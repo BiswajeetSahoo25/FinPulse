@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const Transaction = require("./models/Transaction.js");
 // const bodyParser = require("body-parser");
 require("dotenv").config();
 
@@ -12,9 +13,10 @@ app.use(express.json());
 // app.use(express.static("public"));
 
 // DB connection
-mongoose.connect(process.env.MONGO_URI)
-.then(() => console.log("MongoDB Connected"))
-.catch(err => console.log(err));
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.log(err));
 
 // Routes
 app.get("/", (req, res) => {
@@ -23,14 +25,40 @@ app.get("/", (req, res) => {
 
 // TRANSACTION
 //Create
-app.post("/transactions", (req, res) => {
-  const data = req.body;
+app.post("/transactions", async (req, res) => {
+  try {
+    const { type, amount, category, method, source, note } = req.body;
 
-  console.log(data);
-  res.json({
-    message: "Transaction created",
-    data: data,
-  });
+    //  Basic validation
+    if (!type || !amount) {
+      return res.status(400).json({
+        error: "Type and amount are required",
+      });
+      4;
+    }
+
+    // Create transaction
+    const newTransaction = new Transaction({
+      userId: "demoUser", // temporary (we’ll improve later)
+      type,
+      amount,
+      category,
+      method,
+      source,
+      note,
+    });
+
+    await newTransaction.save();
+
+    res.status(201).json({
+      message: "Transaction saved successfully ✅",
+      data: newTransaction,
+    });
+  } catch (err) {
+    res.status(500).json({
+      error: err.message,
+    });
+  }
 });
 
 //Get
