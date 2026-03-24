@@ -1,8 +1,11 @@
 const express = require("express");
 const User = require("../models/User");
 const { wantsJson } = require("../middleware/auth");
+const { createPasswordHash, verifyPassword } = require("../utils/password");
 
 const router = express.Router();
+const SESSION_COOKIE_NAME = "finpulseUserId";
+const SESSION_DURATION_MS = 1000 * 60 * 60 * 24 * 7;
 
 function buildSafeUser(user) {
   return {
@@ -12,6 +15,27 @@ function buildSafeUser(user) {
     businessName: user.businessName,
     avatar: user.avatar,
   };
+}
+
+function getSessionCookieOptions() {
+  return {
+    httpOnly: true,
+    maxAge: SESSION_DURATION_MS,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  };
+}
+
+function createSession(res, userId) {
+  res.cookie(SESSION_COOKIE_NAME, userId.toString(), getSessionCookieOptions());
+}
+
+function clearSession(res) {
+  res.clearCookie(SESSION_COOKIE_NAME, {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
 }
 
 function renderRegisterPage(res, options = {}) {
@@ -79,15 +103,12 @@ router.post("/register", async (req, res, next) => {
     const user = await User.create({
       name: name.trim(),
       email: email.trim().toLowerCase(),
-      password: password.trim(),
+      password: await createPasswordHash(password.trim()),
       businessName: businessName.trim(),
       avatar: avatar ? avatar.trim() : undefined,
     });
 
-    res.cookie("finpulseUserId", user._id.toString(), {
-      httpOnly: true,
-      sameSite: "lax",
-    });
+    createSession(res, user._id);
 
     if (wantsJson(req)) {
       return res.status(201).json({
@@ -113,8 +134,10 @@ router.get("/login", (req, res) => {
 router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email ? email.trim().toLowerCase() : "";
+    const trimmedPassword = password ? password.trim() : "";
 
-    if (!email || !password) {
+    if (!normalizedEmail || !trimmedPassword) {
       const message = "Please enter your email and password.";
 
       if (wantsJson(req)) {
@@ -128,10 +151,7 @@ router.post("/login", async (req, res, next) => {
       });
     }
 
-    const user = await User.findOne({
-      email: email.trim().toLowerCase(),
-      password: password.trim(),
-    });
+    const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
       const message = "Invalid email or password.";
@@ -147,10 +167,28 @@ router.post("/login", async (req, res, next) => {
       });
     }
 
-    res.cookie("finpulseUserId", user._id.toString(), {
-      httpOnly: true,
-      sameSite: "lax",
-    });
+    const passwordCheck = await verifyPassword(trimmedPassword, user.password);
+
+    if (!passwordCheck.isValid) {
+      const message = "Invalid email or password.";
+
+      if (wantsJson(req)) {
+        return res.status(401).json({ message });
+      }
+
+      return renderLoginPage(res, {
+        status: 401,
+        error: message,
+        formData: req.body,
+      });
+    }
+
+    if (passwordCheck.needsRehash) {
+      user.password = await createPasswordHash(trimmedPassword);
+      await user.save();
+    }
+
+    createSession(res, user._id);
 
     if (wantsJson(req)) {
       return res.json({
@@ -165,9 +203,17 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.get("/logout", (req, res) => {
-  res.clearCookie("finpulseUserId");
+function handleLogout(req, res) {
+  clearSession(res);
+
+  if (wantsJson(req)) {
+    return res.json({ message: "Logout successful." });
+  }
+
   return res.redirect("/login");
-});
+}
+
+router.get("/logout", handleLogout);
+router.post("/logout", handleLogout);
 
 module.exports = router;

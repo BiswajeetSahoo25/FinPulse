@@ -52,7 +52,13 @@ textarea {
 .app-shell {
   display: grid;
   grid-template-columns: 292px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.app-frame {
   min-height: 100vh;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 .sidebar {
@@ -84,7 +90,7 @@ textarea {
 .topbar,
 .section-heading,
 .profile-card,
-.app-footer {
+.footer-inner {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -181,7 +187,7 @@ textarea {
 
 .main-shell {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 1fr;
   gap: 24px;
   min-width: 0;
   padding: 28px;
@@ -206,6 +212,12 @@ textarea {
 .topbar h1 {
   font-size: clamp(2rem, 4vw, 2.9rem);
   line-height: 1;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .identity-meta {
@@ -235,8 +247,7 @@ textarea {
 .hero-panel,
 .panel,
 .summary-card,
-.auth-card,
-.app-footer {
+.auth-card {
   border: 1px solid rgba(24, 24, 27, 0.07);
   box-shadow: var(--shadow);
 }
@@ -426,8 +437,22 @@ textarea:focus {
   background: linear-gradient(135deg, #11151c, #1d7a58);
 }
 
+.secondary-button {
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(24, 24, 27, 0.12);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.82);
+}
+
 .primary-button:hover {
   filter: brightness(1.04);
+}
+
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 1);
 }
 
 .table-wrapper {
@@ -503,12 +528,16 @@ textarea:focus {
 }
 
 .app-footer {
-  justify-content: space-between;
   width: 100%;
-  padding: 24px 26px;
-  border-radius: var(--radius-xl);
   color: #f8fafc;
   background: linear-gradient(135deg, #11151c, #1a222d);
+}
+
+.footer-inner {
+  justify-content: space-between;
+  width: min(100%, 1440px);
+  margin: 0 auto;
+  padding: 24px 28px;
 }
 
 .footer-copy {
@@ -598,7 +627,7 @@ canvas {
 @media (max-width: 900px) {
   .topbar,
   .hero-panel,
-  .app-footer {
+  .footer-inner {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -612,6 +641,10 @@ canvas {
 @media (max-width: 720px) {
   .main-shell {
     padding: 18px;
+  }
+
+  .footer-inner {
+    padding: 24px 18px;
   }
 
   .sidebar-nav {

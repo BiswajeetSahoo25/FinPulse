@@ -7,11 +7,17 @@
     </div>
   </div>
 
-  <div class="profile-card">
-    <img
-      src="<%= currentUser.avatar %>"
-      alt="<%= currentUser.name %>"
-      class="avatar-lg"
-    />
+  <div class="topbar-actions">
+    <div class="profile-card">
+      <img
+        src="<%= currentUser.avatar %>"
+        alt="<%= currentUser.name %>"
+        class="avatar-lg"
+      />
+    </div>
+
+    <form action="/logout" method="POST">
+      <button type="submit" class="secondary-button">Logout</button>
+    </form>
   </div>
 </header>

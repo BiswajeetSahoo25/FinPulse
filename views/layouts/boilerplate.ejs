@@ -18,18 +18,20 @@
         <%- body %>
       </main>
     <% } else { %>
-      <div class="app-shell">
-        <%- include("../includes/sidebar") %>
+      <div class="app-frame">
+        <div class="app-shell">
+          <%- include("../includes/sidebar") %>
 
-        <div class="main-shell">
-          <%- include("../includes/header") %>
+          <div class="main-shell">
+            <%- include("../includes/header") %>
 
-          <main class="page-shell">
-            <%- body %>
-          </main>
-
-          <%- include("../includes/footer") %>
+            <main class="page-shell">
+              <%- body %>
+            </main>
+          </div>
         </div>
+
+        <%- include("../includes/footer") %>
       </div>
 
       <script>

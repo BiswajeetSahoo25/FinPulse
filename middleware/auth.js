@@ -37,7 +37,9 @@ async function attachCurrentUser(req, res, next) {
       return next();
     }
 
-    const currentUser = await User.findById(currentUserId).lean();
+    const currentUser = await User.findById(currentUserId)
+      .select("name email businessName avatar")
+      .lean();
 
     if (!currentUser) {
       res.clearCookie("finpulseUserId");
