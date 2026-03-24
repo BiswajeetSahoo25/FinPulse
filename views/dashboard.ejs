@@ -1,21 +1,102 @@
-<h1>FinPulse Dashboard</h1>
+<!-- Page Header -->
+<div class="mb-4">
+  <h2 class="fw-bold text-dark mb-0">
+    <i class="bi bi-speedometer2 me-2 text-success"></i> Dashboard
+  </h2>
+  <p class="text-muted small mt-1">Welcome back, Demo User</p>
+</div>
 
-<div class="container">
-  <div class="card income">
-    <h3>Total Income</h3>
-    <div class="amount">₹ <%= summary.totalIncome %></div>
+<!-- Stat Cards -->
+<div class="row g-4 mb-4">
+  <div class="col-sm-12 col-md-4">
+    <div class="stat-card income d-flex justify-content-between align-items-center">
+      <div>
+        <div class="stat-label"><i class="bi bi-arrow-up-circle me-1"></i> Total Income</div>
+        <div class="stat-amount">₹<%= summary.totalIncome.toLocaleString() %></div>
+      </div>
+      <i class="bi bi-cash-coin stat-icon"></i>
+    </div>
   </div>
-
-  <div class="card expense">
-    <h3>Total Expense</h3>
-    <div class="amount">₹ <%= summary.totalExpense %></div>
+  <div class="col-sm-12 col-md-4">
+    <div class="stat-card expense d-flex justify-content-between align-items-center">
+      <div>
+        <div class="stat-label"><i class="bi bi-arrow-down-circle me-1"></i> Total Expense</div>
+        <div class="stat-amount">₹<%= summary.totalExpense.toLocaleString() %></div>
+      </div>
+      <i class="bi bi-cart-dash stat-icon"></i>
+    </div>
   </div>
-
-  <div class="card profit">
-    <h3>Profit</h3>
-    <div class="amount">₹ <%= summary.profit %></div>
+  <div class="col-sm-12 col-md-4">
+    <div class="stat-card profit d-flex justify-content-between align-items-center">
+      <div>
+        <div class="stat-label"><i class="bi bi-wallet2 me-1"></i> Net Profit</div>
+        <div class="stat-amount">₹<%= summary.profit.toLocaleString() %></div>
+      </div>
+      <i class="bi bi-graph-up-arrow stat-icon"></i>
+    </div>
   </div>
 </div>
+
+<!-- Charts -->
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="chart-card">
+      <h5><i class="bi bi-bar-chart me-2 text-primary"></i>Monthly Income vs Expense</h5>
+      <canvas id="monthlyChart"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="chart-card">
+      <h5><i class="bi bi-pie-chart me-2 text-danger"></i>Expense by Category</h5>
+      <canvas id="categoryChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Monthly Bar Chart
+  const monthly = <%- JSON.stringify(monthly) %>;
+  const labels = Object.keys(monthly).sort();
+  const incomeData  = labels.map(k => monthly[k].income);
+  const expenseData = labels.map(k => monthly[k].expense);
+
+  new Chart(document.getElementById('monthlyChart'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Income',  data: incomeData,  backgroundColor: '#2ecc71', borderRadius: 6 },
+        { label: 'Expense', data: expenseData, backgroundColor: '#e74c3c', borderRadius: 6 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Category Doughnut Chart
+  const categories = <%- JSON.stringify(categoryBreakdown) %>;
+  const catLabels = Object.keys(categories);
+  const catData   = Object.values(categories);
+
+  new Chart(document.getElementById('categoryChart'), {
+    type: 'doughnut',
+    data: {
+      labels: catLabels,
+      datasets: [{
+        data: catData,
+        backgroundColor: ['#3498db','#e74c3c','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22'],
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+</script>
 
 <h2 style="text-align:center; margin-top:50px;">Monthly Overview</h2>
 

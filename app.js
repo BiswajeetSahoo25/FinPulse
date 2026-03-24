@@ -1,15 +1,14 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const Transaction = require("./models/Transaction.js");
-// const bodyParser = require("body-parser");
 const expressLayouts = require("express-ejs-layouts");
 require("dotenv").config();
 
 const app = express();
 
 // Middleware
-// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(expressLayouts);
@@ -154,23 +153,25 @@ app.get("/dashboard", async (req, res) => {
 
     let totalIncome = 0;
     let totalExpense = 0;
-
     const monthly = {};
+    const categoryBreakdown = {};
 
     transactions.forEach((t) => {
       if (t.type === "income") totalIncome += t.amount;
       else totalExpense += t.amount;
 
+      // Monthly grouping
       const date = new Date(t.date);
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const key = `${date.getFullYear()}-${month}`;
-
-      if (!monthly[key]) {
-        monthly[key] = { income: 0, expense: 0 };
-      }
-
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+      if (!monthly[key]) monthly[key] = { income: 0, expense: 0 };
       if (t.type === "income") monthly[key].income += t.amount;
       else monthly[key].expense += t.amount;
+
+      // Category breakdown (expenses only)
+      if (t.type === "expense") {
+        const cat = t.category || "other";
+        categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + t.amount;
+      }
     });
 
     const summary = {
@@ -179,15 +180,11 @@ app.get("/dashboard", async (req, res) => {
       profit: totalIncome - totalExpense,
     };
 
-    res.render("dashboard", { summary, monthly });
+    res.render("dashboard", { summary, monthly, categoryBreakdown });
   } catch (err) {
-    res.send(err.message);
+    res.status(500).json({ error: err.message });
   }
 });
-
-// const transactionRoutes = require("./routes/transactionRoutes");
-
-// app.use("/transactions", transactionRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

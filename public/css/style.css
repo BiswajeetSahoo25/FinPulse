@@ -1,35 +1,109 @@
+/* ===== Base ===== */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f4f7f6;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: #f0f2f5;
+  padding-top: 56px; /* offset for fixed navbar */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   margin: 0;
 }
 
-h1 {
-  text-align: center;
-  margin-top: 20px;
+/* ===== Layout ===== */
+#wrapper {
+  flex: 1;
+  align-items: stretch;
 }
 
-.container {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 40px;
-}
-
-.card {
-  background: white;
-  padding: 20px;
+/* ===== Sidebar ===== */
+#sidebar {
   width: 220px;
-  border-radius: 12px;
-  text-align: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  min-height: calc(100vh - 56px - 50px);
+  flex-shrink: 0;
+  position: sticky;
+  top: 56px;
+  align-self: flex-start;
 }
 
-.income { border-top: 5px solid #2ecc71; }
-.expense { border-top: 5px solid #e74c3c; }
-.profit { border-top: 5px solid #3498db; }
+#sidebar .nav-link {
+  padding: 11px 18px;
+  font-size: 0.93rem;
+  border-radius: 8px;
+  margin: 3px 8px;
+  transition: background 0.2s, color 0.2s;
+  color: rgba(255,255,255,0.75) !important;
+}
 
-.amount {
-  font-size: 26px;
-  margin-top: 10px;
-  font-weight: bold;
+#sidebar .nav-link:hover,
+#sidebar .nav-link.active {
+  background-color: rgba(255,255,255,0.12);
+  color: #fff !important;
+}
+
+#sidebar .nav-link i {
+  width: 20px;
+}
+
+/* ===== Page Content ===== */
+#page-content-wrapper {
+  flex: 1;
+  padding: 32px;
+  overflow-x: hidden;
+}
+
+/* ===== Stat Cards ===== */
+.stat-card {
+  border: none;
+  border-radius: 16px;
+  padding: 28px 24px;
+  color: white;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.16);
+}
+
+.stat-card.income  { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+.stat-card.expense { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.stat-card.profit  { background: linear-gradient(135deg, #3498db, #2980b9); }
+
+.stat-card .stat-label {
+  font-size: 0.88rem;
+  opacity: 0.88;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.stat-card .stat-amount {
+  font-size: 2.1rem;
+  font-weight: 700;
+  margin-top: 6px;
+  letter-spacing: -0.5px;
+}
+
+.stat-card .stat-icon {
+  font-size: 2.2rem;
+  opacity: 0.35;
+}
+
+/* ===== Chart Cards ===== */
+.chart-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
+
+.chart-card h5 {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 18px;
+}
+
+/* ===== Footer ===== */
+#footer {
+  flex-shrink: 0;
 }
