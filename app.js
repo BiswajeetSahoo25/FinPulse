@@ -9,8 +9,8 @@ const app = express();
 // Middleware
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
-// app.set("view engine", "ejs");
-// app.use(express.static("public"));
+app.set("view engine", "ejs");
+app.use(express.static("public"));
 
 // DB connection
 mongoose
@@ -102,7 +102,6 @@ app.get("/summary", async (req, res) => {
   }
 });
 
-
 //ANALYTICS
 app.get("/analytics", async (req, res) => {
   try {
@@ -140,12 +139,36 @@ app.get("/analytics", async (req, res) => {
       monthly,
       categoryBreakdown,
     });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// DASHBOARD
+app.get("/dashboard", async (req, res) => {
+  try {
+    const transactions = await Transaction.find();
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    transactions.forEach((t) => {
+      if (t.type === "income") totalIncome += t.amount;
+      else totalExpense += t.amount;
+    });
+
+    const summary = {
+      totalIncome,
+      totalExpense,
+      profit: totalIncome - totalExpense,
+    };
+
+    res.render("dashboard", { summary });
+
+  } catch (err) {
+    res.send(err.message);
+  }
+});
 
 // const transactionRoutes = require("./routes/transactionRoutes");
 
