@@ -1,0 +1,29 @@
+{
+  "name": "finpulse",
+  "version": "1.0.0",
+  "description": "FinPulse MVP fintech dashboard built with Node.js, Express, MongoDB, and EJS.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "keywords": [
+    "fintech",
+    "dashboard",
+    "express",
+    "mongodb",
+    "ejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "express-ejs-layouts": "^2.5.1",
+    "mongoose": "^9.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
