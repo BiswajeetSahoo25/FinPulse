@@ -446,6 +446,10 @@ textarea {
   background: rgba(245, 243, 238, 0.82);
 }
 
+.chart-empty[hidden] {
+  display: none;
+}
+
 .pill {
   display: inline-flex;
   align-items: center;

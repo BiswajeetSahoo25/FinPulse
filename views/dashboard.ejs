@@ -1,5 +1,5 @@
 <%
-  const categoryPalette = ["#1d7a58", "#0f766e", "#f97316", "#f59e0b", "#ef4444", "#6366f1"];
+  const categoryPalette = ["#ef4444", "#f97316", "#f59e0b", "#fb7185", "#dc2626", "#fca5a5"];
   const expenseBreakdown = Object.entries(analytics.categoryBreakdown).sort((entryA, entryB) => entryB[1] - entryA[1]);
   const topExpense = expenseBreakdown[0];
   const latestTransaction = transactions[0];
@@ -331,6 +331,9 @@
   });
 
   if (categoryLabels.length) {
+    categoryChartContext.hidden = false;
+    categoryChartEmpty.hidden = true;
+
     new Chart(categoryChartContext, {
       type: "doughnut",
       data: {
@@ -356,7 +359,7 @@
           tooltip: {
             callbacks: {
               label(context) {
-                return `${context.label}: ${currencyFormatter.format(context.parsed || 0)}`;
+                return `${context.label}: ${currencyFormatter.format(context.parsed || 0)} in expenses`;
               },
             },
           },
