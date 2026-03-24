@@ -1,0 +1,191 @@
+﻿<div class="modal fade" id="userManagerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content user-manager-modal">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-people me-2"></i>User Manager
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <ul class="nav nav-tabs user-manager-tabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#switchUserTab" type="button" role="tab">Switch user</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#addUserTab" type="button" role="tab">Add user</button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profileTab" type="button" role="tab">Profile</button>
+          </li>
+        </ul>
+
+        <div class="tab-content pt-4">
+          <section class="tab-pane fade show active" id="switchUserTab" role="tabpanel">
+            <form method="POST" action="/auth/login" class="row g-3">
+              <input type="hidden" name="redirectTo" value="<%= currentPath %>">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Choose user</label>
+                <select class="form-select" name="userId" required>
+                  <% userList.forEach((user) => { %>
+                    <option value="<%= user._id %>" <%= String(currentUser._id) === String(user._id) ? "selected" : "" %>>
+                      <%= user.name %> · <%= user.businessName %>
+                    </option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Password</label>
+                <input type="password" class="form-control" name="password" minlength="6" required>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-dark" type="submit">
+                  <i class="bi bi-arrow-repeat me-1"></i>Switch user
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="tab-pane fade" id="addUserTab" role="tabpanel">
+            <form method="POST" action="/auth/users" class="row g-3" data-image-form>
+              <input type="hidden" name="redirectTo" value="<%= currentPath %>">
+              <input type="hidden" name="profileImageData" data-image-hidden>
+
+              <div class="col-12 auth-avatar-builder">
+                <div class="auth-avatar-preview" data-image-preview>
+                  <span>+</span>
+                </div>
+                <div>
+                  <label class="form-label fw-semibold">Profile picture</label>
+                  <input type="file" class="form-control" accept="image/*" data-image-input>
+                  <div class="form-text">Optional. Stored with the user profile.</div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Name</label>
+                <input type="text" class="form-control" name="name" maxlength="80" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email</label>
+                <input type="email" class="form-control" name="email" maxlength="120" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Password</label>
+                <input type="password" class="form-control" name="password" minlength="6" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Profession</label>
+                <input type="text" class="form-control" name="profession" maxlength="80" placeholder="Shop owner, freelancer">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Business name</label>
+                <input type="text" class="form-control" name="businessName" maxlength="100" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Currency</label>
+                <select class="form-select" name="currency" required>
+                  <% validCurrencies.forEach((currency) => { %>
+                    <option value="<%= currency %>" <%= currency === "INR" ? "selected" : "" %>><%= currency %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-success" type="submit">
+                  <i class="bi bi-person-plus me-1"></i>Add user
+                </button>
+              </div>
+            </form>
+          </section>
+
+          <section class="tab-pane fade" id="profileTab" role="tabpanel">
+            <div class="current-user-card mb-4">
+              <div class="sidebar-avatar profile-display-avatar <%= currentUser.profileImage ? "has-image" : "" %>">
+                <% if (currentUser.profileImage) { %>
+                  <img src="<%= currentUser.profileImage %>" alt="<%= currentUser.name %> profile picture">
+                <% } else { %>
+                  <span><%= currentUserInitials %></span>
+                <% } %>
+              </div>
+              <div>
+                <h6 class="mb-1"><%= currentUser.name %></h6>
+                <p class="mb-1 text-muted"><%= currentUser.businessName %></p>
+                <p class="mb-1 text-muted"><%= currentUser.email %></p>
+                <p class="mb-0 text-muted"><%= currentUser.profession || "Profession not added yet" %> · <%= currentUser.currency || "INR" %></p>
+              </div>
+            </div>
+
+            <form method="POST" action="/auth/profile" class="row g-3" data-image-form>
+              <input type="hidden" name="redirectTo" value="<%= currentPath %>">
+              <input type="hidden" name="profileImageData" data-image-hidden>
+              <div class="col-12 auth-avatar-builder">
+                <div class="auth-avatar-preview <%= currentUser.profileImage ? "has-image" : "" %>" data-image-preview>
+                  <% if (currentUser.profileImage) { %>
+                    <img src="<%= currentUser.profileImage %>" alt="<%= currentUser.name %> profile picture">
+                  <% } else { %>
+                    <span><%= currentUserInitials %></span>
+                  <% } %>
+                </div>
+                <div>
+                  <label class="form-label fw-semibold">Update picture</label>
+                  <input type="file" class="form-control" accept="image/*" data-image-input>
+                  <div class="form-text">Leave empty to keep the current picture.</div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Name</label>
+                <input type="text" class="form-control" name="name" value="<%= currentUser.name %>" maxlength="80" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email</label>
+                <input type="email" class="form-control" name="email" value="<%= currentUser.email %>" maxlength="120" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Profession</label>
+                <input type="text" class="form-control" name="profession" value="<%= currentUser.profession || "" %>" maxlength="80">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Business name</label>
+                <input type="text" class="form-control" name="businessName" value="<%= currentUser.businessName %>" maxlength="100" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Currency</label>
+                <select class="form-select" name="currency" required>
+                  <% validCurrencies.forEach((currency) => { %>
+                    <option value="<%= currency %>" <%= (currentUser.currency || "INR") === currency ? "selected" : "" %>><%= currency %></option>
+                  <% }) %>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">New password</label>
+                <input type="password" class="form-control" name="password" minlength="6" placeholder="Leave blank to keep current password">
+              </div>
+              <div class="col-12">
+                <button class="btn btn-outline-dark" type="submit">
+                  <i class="bi bi-check2-circle me-1"></i>Update profile
+                </button>
+              </div>
+            </form>
+
+            <hr class="my-4">
+
+            <form method="POST" action="/auth/users/<%= currentUser._id %>/delete" class="row g-3">
+              <input type="hidden" name="redirectTo" value="<%= currentPath %>">
+              <div class="col-12">
+                <label class="form-label fw-semibold text-danger">Delete this user</label>
+                <input type="password" class="form-control" name="password" minlength="6" placeholder="Enter password to confirm" required>
+                <div class="form-text">Deleting a user also deletes all of that user's transactions.</div>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-outline-danger" type="submit">
+                  <i class="bi bi-trash me-1"></i>Delete current user
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

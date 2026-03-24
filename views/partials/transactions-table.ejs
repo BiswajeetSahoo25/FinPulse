@@ -13,7 +13,7 @@
 %>
 
 <div class="table-responsive">
-  <table class="table table-hover align-middle finance-table">
+  <table class="table table-hover align-middle finance-table" id="transactionsTable">
     <thead class="table-dark">
       <tr>
         <th>Date</th>
@@ -27,7 +27,20 @@
     </thead>
     <tbody>
       <% transactions.forEach((transaction) => { %>
-        <tr>
+        <tr
+          data-type="<%= transaction.type %>"
+          data-category="<%= (transaction.category || "General").toLowerCase() %>"
+          data-method="<%= transaction.method || "none" %>"
+          data-search="<%= [
+            formatDate(transaction.date),
+            transaction.type,
+            transaction.category || "General",
+            transaction.method || "",
+            transaction.source || "",
+            transaction.note || "",
+          ].join(" ").toLowerCase() %>"
+          data-amount="<%= transaction.amount %>"
+        >
           <td class="fw-semibold"><%= formatDate(transaction.date) %></td>
           <td>
             <span class="type-pill <%= transaction.type %>">

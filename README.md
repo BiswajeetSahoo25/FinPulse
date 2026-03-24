@@ -1,18 +1,24 @@
 ﻿# FinPulse
 
-FinPulse is a lightweight finance dashboard built with Express, EJS, and MongoDB.
+FinPulse is a lightweight finance dashboard built with Express, EJS, MongoDB, and an optional Gemini-powered business coach.
 
 ## Scripts
 
 - `npm run dev` starts the app with Nodemon.
 - `npm start` starts the production server.
-- `npm test` runs the Node test suite.
+- `npm test` runs the local finance utility tests.
+
+## Environment
+
+- `MONGO_URI` is required.
+- `GEMINI_API_KEY` enables the dashboard AI coach.
+- `GEMINI_MODEL` is optional. Default: `gemini-2.5-flash`.
 
 ## Pages
 
-- `/dashboard` overview with charts and recent transactions
+- `/dashboard` utility-first workspace with AI chat
 - `/transactions` full transaction log
-- `/summary` income, expense, and monthly rollups
+- `/summary` KPI cards and monthly rollups
 - `/analytics` chart-focused analytics view
 
 ## API
@@ -21,3 +27,5 @@ FinPulse is a lightweight finance dashboard built with Express, EJS, and MongoDB
 - `POST /api/transactions`
 - `GET /api/summary`
 - `GET /api/analytics`
+- `POST /api/assistant`
+

@@ -8,6 +8,10 @@
   const [latestYear, latestMonthNumber] = latestMonthKey ? latestMonthKey.split("-") : [];
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const latestMonthLabel = latestMonthKey ? `${monthNames[Number(latestMonthNumber) - 1]} ${latestYear}` : "No data yet";
+  const strongestMonth = insights.strongestMonth;
+  const weakestMonth = insights.weakestMonth;
+  const strongestMonthLabel = strongestMonth ? `${monthNames[Number(strongestMonth.key.split('-')[1]) - 1]} ${strongestMonth.key.split('-')[0]}` : "No data yet";
+  const weakestMonthLabel = weakestMonth ? `${monthNames[Number(weakestMonth.key.split('-')[1]) - 1]} ${weakestMonth.key.split('-')[0]}` : "No data yet";
 %>
 
 <div class="page-header d-flex justify-content-between align-items-start gap-3 mb-4">
@@ -25,6 +29,80 @@
 </div>
 
 <%- include("partials/stats", { summary }) %>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-4">
+    <div class="chart-card h-100">
+      <h5 class="mb-3">
+        <i class="bi bi-trophy me-2 text-warning"></i>Best Month
+      </h5>
+      <% if (!strongestMonth) { %>
+        <div class="empty-state py-5">
+          <p class="mb-0">Need more monthly data to identify your strongest period.</p>
+        </div>
+      <% } else { %>
+        <ul class="metric-list compact-metrics">
+          <li>
+            <span class="metric-label">Month</span>
+            <span class="metric-value"><%= strongestMonthLabel %></span>
+          </li>
+          <li>
+            <span class="metric-label">Net</span>
+            <span class="metric-value text-success">&#8377;<%= strongestMonth.net.toLocaleString("en-IN") %></span>
+          </li>
+          <li>
+            <span class="metric-label">Savings Rate</span>
+            <span class="metric-value"><%= insights.savingsRate.toFixed(1) %>%</span>
+          </li>
+        </ul>
+      <% } %>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="chart-card h-100">
+      <h5 class="mb-3">
+        <i class="bi bi-speedometer me-2 text-primary"></i>Performance Pulse
+      </h5>
+      <ul class="metric-list compact-metrics">
+        <li>
+          <span class="metric-label">Tracked Months</span>
+          <span class="metric-value"><%= insights.trackedMonths %></span>
+        </li>
+        <li>
+          <span class="metric-label">Average Monthly Net</span>
+          <span class="metric-value <%= insights.averageMonthlyNet >= 0 ? "text-success" : "text-danger" %>">
+            <%= insights.averageMonthlyNet >= 0 ? "+" : "-" %>&#8377;<%= Math.abs(insights.averageMonthlyNet).toLocaleString("en-IN", { maximumFractionDigits: 0 }) %>
+          </span>
+        </li>
+        <li>
+          <span class="metric-label">Weakest Month</span>
+          <span class="metric-value"><%= weakestMonthLabel %></span>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="chart-card h-100">
+      <h5 class="mb-3">
+        <i class="bi bi-pie-chart me-2 text-danger"></i>Expense Concentration
+      </h5>
+      <% if (!insights.topExpenseCategory) { %>
+        <div class="empty-state py-5">
+          <p class="mb-0">Expense concentration appears once spending is recorded.</p>
+        </div>
+      <% } else { %>
+        <div class="category-spotlight">
+          <div class="spotlight-name"><%= insights.topExpenseCategory.name %></div>
+          <div class="spotlight-amount text-danger">&#8377;<%= insights.topExpenseCategory.amount.toLocaleString("en-IN") %></div>
+          <div class="progress expense-progress mb-2">
+            <div class="progress-bar bg-danger" role="progressbar" style="width: <%= Math.min(insights.topExpenseCategory.share, 100) %>%"></div>
+          </div>
+          <p class="muted-note mb-0"><%= insights.topExpenseCategory.share.toFixed(1) %>% of all recorded expenses come from this category.</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>
 
 <div class="row g-4 mb-4">
   <div class="col-lg-6">

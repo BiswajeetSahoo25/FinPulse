@@ -1,106 +1,279 @@
-﻿<div class="page-header d-flex justify-content-between align-items-start gap-3 mb-4">
-  <div>
-    <h1 class="page-title">
-      <i class="bi bi-speedometer2 me-2 text-success"></i>Dashboard
-    </h1>
-    <p class="section-subtitle mb-0">
-      A quick pulse on income, spending, and recent activity.
-    </p>
-  </div>
-  <button
-    class="btn btn-success"
-    data-bs-toggle="modal"
-    data-bs-target="#addTransactionModal"
-  >
-    <i class="bi bi-plus-circle me-1"></i>Add Transaction
-  </button>
-</div>
+﻿<%
+  const transactionCount = transactions.length;
+  const monthCount = Object.keys(monthly).length;
+  const monthKeys = Object.keys(monthly).sort();
+  const latestMonthKey = monthKeys.length > 0 ? monthKeys[monthKeys.length - 1] : null;
+  const latestMonth = latestMonthKey ? monthly[latestMonthKey] : null;
+  const latestMonthNet = latestMonth ? latestMonth.income - latestMonth.expense : 0;
+  const recentTransactions = transactions.slice(0, 3);
+  const now = new Date();
+  const thirtyDaysMs = 1000 * 60 * 60 * 24 * 30;
+  const recentActivityCount = transactions.filter((transaction) => {
+    return (
+      transaction.date &&
+      !Number.isNaN(transaction.date.getTime()) &&
+      now - transaction.date <= thirtyDaysMs
+    );
+  }).length;
+  const formatMoney = (value) =>
+    Number(value || 0).toLocaleString("en-IN", {
+      maximumFractionDigits: 0,
+    });
+  const savingsRate = Number(insights.savingsRate || 0);
+  let pulseTone = "building";
+  let pulseTitle = "Building rhythm";
+  let pulseCopy =
+    "Keep feeding the ledger so the coach can spot stronger patterns and sharper opportunities.";
 
-<%- include("partials/stats", { summary }) %>
+  if (transactionCount === 0) {
+    pulseTone = "empty";
+    pulseTitle = "Quiet canvas";
+    pulseCopy =
+      "There is not enough movement yet, so this space will become more useful as soon as fresh transactions land.";
+  } else if (summary.profit > 0 && savingsRate >= 25) {
+    pulseTone = "strong";
+    pulseTitle = "Profit momentum";
+    pulseCopy =
+      "The business is keeping a healthy cushion, which gives you room to invest carefully instead of reacting defensively.";
+  } else if (summary.profit > 0) {
+    pulseTone = "steady";
+    pulseTitle = "Stable climb";
+    pulseCopy =
+      "You are in positive territory, but the margin still has room to get cleaner and more predictable.";
+  } else {
+    pulseTone = "watch";
+    pulseTitle = "Pressure zone";
+    pulseCopy =
+      "Expenses are outrunning income right now, so the next few decisions should focus on control and recovery.";
+  }
 
-<div class="row g-4 mb-4">
-  <div class="col-lg-7">
-    <div class="chart-card h-100">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">
-          <i class="bi bi-bar-chart me-2 text-primary"></i>Monthly Income vs Expense
-        </h5>
-        <span class="text-muted small">Auto-grouped by month</span>
-      </div>
-      <% if (Object.keys(monthly).length === 0) { %>
-        <div class="empty-state py-5">
-          <p class="mb-0">No transaction data yet. Add your first entry to unlock charts.</p>
+  const nextMove =
+    transactionCount === 0
+      ? "Log your first transaction so the dashboard can start building a useful story."
+      : insights.topExpenseCategory && insights.topExpenseCategory.share >= 45
+        ? `Audit ${insights.topExpenseCategory.name} first. It is carrying ${insights.topExpenseCategory.share.toFixed(1)}% of your total expense.`
+        : latestMonthKey && latestMonthNet < 0
+          ? `Review ${latestMonthKey} closely. That month finished below zero and should shape your next action plan.`
+          : "Ask the AI coach for a 30-day action plan and compare it with your strongest month.";
+%>
+
+<div class="dashboard-shell">
+  <section class="dashboard-hero chart-card mb-4">
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+      <div class="profile-hero">
+        <div class="profile-avatar-circle <%= ownerImage ? "has-image" : "" %>" aria-hidden="true">
+          <% if (ownerImage) { %>
+            <img src="<%= ownerImage %>" alt="<%= ownerName %> profile picture">
+          <% } else { %>
+            <span><%= ownerInitials %></span>
+          <% } %>
         </div>
-      <% } else { %>
-        <canvas id="monthlyChart"></canvas>
-      <% } %>
+        <div class="profile-meta">
+          <h1 class="business-name mb-1"><%= businessName %></h1>
+          <p class="owner-name mb-0"><%= ownerName %><%= ownerProfession ? ` · ${ownerProfession}` : "" %></p>
+        </div>
+      </div>
+      <div class="dashboard-hero-meta">
+        <span class="hero-badge">
+          <i class="bi bi-database-check me-1"></i><%= transactionCount %> transactions tracked
+        </span>
+        <span class="hero-badge">
+          <i class="bi bi-calendar3 me-1"></i><%= monthCount %> active month<%= monthCount === 1 ? "" : "s" %>
+        </span>
+      </div>
     </div>
-  </div>
-  <div class="col-lg-5">
-    <div class="chart-card h-100">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">
-          <i class="bi bi-pie-chart me-2 text-danger"></i>Expense by Category
-        </h5>
-        <span class="text-muted small">Spending mix</span>
-      </div>
-      <% if (Object.keys(categoryBreakdown).length === 0) { %>
-        <div class="empty-state py-5">
-          <p class="mb-0">Expense categories will appear here once you log spending.</p>
-        </div>
-      <% } else { %>
-        <canvas id="categoryChart"></canvas>
-      <% } %>
-    </div>
-  </div>
-</div>
+  </section>
 
-<div class="row g-4">
-  <div class="col-xl-8">
-    <%- include("partials/monthly-table", { monthly }) %>
-  </div>
-  <div class="col-xl-4">
-    <div class="chart-card h-100">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h5 class="mb-0">
-          <i class="bi bi-clock-history me-2 text-secondary"></i>Recent Transactions
-        </h5>
-        <a href="/transactions" class="small fw-semibold text-decoration-none">View all</a>
-      </div>
-
-      <% if (transactions.length === 0) { %>
-        <div class="empty-state py-5">
-          <p class="mb-0">No transactions yet.</p>
+  <div class="row g-4 align-items-stretch">
+    <div class="col-xl-5 d-flex flex-column gap-4">
+      <section class="chart-card pulse-card pulse-card-<%= pulseTone %>">
+        <div class="pulse-card-head">
+          <div>
+            <p class="eyebrow mb-2">Signal Deck</p>
+            <h5 class="mb-1">
+              <i class="bi bi-stars me-2 text-primary"></i>Business Pulse Studio
+            </h5>
+            <p class="text-muted mb-0">
+              A visual read on momentum, pressure, and where your attention is most valuable right now.
+            </p>
+          </div>
+          <button
+            class="btn btn-success btn-sm pulse-log-btn"
+            data-bs-toggle="modal"
+            data-bs-target="#addTransactionModal"
+            type="button"
+          >
+            <i class="bi bi-plus-circle me-1"></i>Log fresh entry
+          </button>
         </div>
-      <% } else { %>
-        <div class="recent-list">
-          <% transactions.slice(0, 5).forEach((transaction) => { %>
-            <div class="recent-item">
-              <div>
-                <div class="fw-semibold"><%= transaction.category || "General" %></div>
-                <div class="text-muted small">
-                  <%= transaction.method ? transaction.method.toUpperCase() : "No method" %>
-                </div>
-              </div>
-              <div class="text-end">
-                <div class="<%= transaction.type === 'income' ? 'text-success' : 'text-danger' %> fw-semibold">
-                  <%= transaction.type === "income" ? "+" : "-" %>&#8377;<%= transaction.amount.toLocaleString("en-IN") %>
-                </div>
-                <div class="text-muted small">
-                  <%= transaction.date && !Number.isNaN(transaction.date.getTime())
-                    ? transaction.date.toLocaleDateString("en-IN", { day: "2-digit", month: "short" })
-                    : "Unknown" %>
-                </div>
-              </div>
+
+        <div class="pulse-hero-panel">
+          <div class="pulse-orb-wrap">
+            <div class="pulse-orb pulse-orb-<%= pulseTone %>">
+              <span class="pulse-orb-label">Savings rate</span>
+              <strong><%= `${Math.round(Math.max(savingsRate, 0))}%` %></strong>
+              <span class="pulse-orb-sub">live mood</span>
             </div>
-          <% }) %>
+          </div>
+
+          <div class="pulse-story">
+            <span class="pulse-status pulse-status-<%= pulseTone %>"><%= pulseTitle %></span>
+            <h6 class="mb-2">
+              <%= summary.profit >= 0 ? "Net profit" : "Net loss" %>
+              of INR <%= formatMoney(Math.abs(summary.profit)) %>
+            </h6>
+            <p class="mb-0"><%= pulseCopy %></p>
+
+            <div class="pulse-action-row">
+              <button
+                type="button"
+                class="suggestion-chip"
+                data-prompt="Give me a smart game plan based on my current business numbers."
+              >
+                Ask AI for a game plan
+              </button>
+              <button
+                type="button"
+                class="suggestion-chip"
+                data-prompt="What is the single most important thing I should improve this month?"
+              >
+                Find my main focus
+              </button>
+            </div>
+          </div>
         </div>
-      <% } %>
+
+        <div class="pulse-metric-grid">
+          <article class="pulse-metric">
+            <span class="pulse-metric-label">Latest month</span>
+            <strong><%= latestMonthKey || "No month yet" %></strong>
+            <p class="mb-0">
+              <%= latestMonth
+                ? `Net INR ${formatMoney(Math.abs(latestMonthNet))} ${latestMonthNet >= 0 ? "ahead" : "behind"}`
+                : "Your latest monthly read will appear here." %>
+            </p>
+          </article>
+
+          <article class="pulse-metric">
+            <span class="pulse-metric-label">Expense focus</span>
+            <strong><%= insights.topExpenseCategory ? insights.topExpenseCategory.name : "No category yet" %></strong>
+            <p class="mb-0">
+              <%= insights.topExpenseCategory
+                ? `${insights.topExpenseCategory.share.toFixed(1)}% of total expense is concentrated here.`
+                : "Once expense categories appear, this card will spotlight the heaviest one." %>
+            </p>
+          </article>
+
+          <article class="pulse-metric">
+            <span class="pulse-metric-label">Strongest month</span>
+            <strong><%= insights.strongestMonth ? insights.strongestMonth.key : "Not enough data" %></strong>
+            <p class="mb-0">
+              <%= insights.strongestMonth
+                ? `Peak net result: INR ${formatMoney(insights.strongestMonth.net)}`
+                : "A stronger trendline will appear after more activity is logged." %>
+            </p>
+          </article>
+
+          <article class="pulse-metric">
+            <span class="pulse-metric-label">Recent motion</span>
+            <strong><%= recentActivityCount %> in 30 days</strong>
+            <p class="mb-0">
+              <%= recentActivityCount > 0
+                ? "Fresh activity is feeding the dashboard, which makes the coach more useful."
+                : "No recent activity yet, so the dashboard is running mostly on older data." %>
+            </p>
+          </article>
+        </div>
+
+        <div class="pulse-foot">
+          <div class="pulse-next-move">
+            <span class="pulse-foot-label">Next good move</span>
+            <p class="mb-0"><%= nextMove %></p>
+          </div>
+
+          <div class="pulse-recent-strip">
+            <span class="pulse-foot-label">Recent motion</span>
+            <% if (recentTransactions.length === 0) { %>
+              <p class="mb-0 text-muted">New entries will create a live activity strip here.</p>
+            <% } else { %>
+              <div class="pulse-activity-list">
+                <% recentTransactions.forEach((transaction) => { %>
+                  <span class="pulse-activity-pill <%= transaction.type === "income" ? "income" : "expense" %>">
+                    <%= transaction.category || "General" %>
+                    ·
+                    <%= transaction.type === "income" ? "+" : "-" %>INR <%= formatMoney(transaction.amount) %>
+                  </span>
+                <% }) %>
+              </div>
+            <% } %>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col-xl-7">
+      <section class="chart-card assistant-card h-100" id="assistantPanel" data-ai-enabled="<%= aiEnabled ? "true" : "false" %>" data-user-key="<%= currentUserId %>">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+          <div>
+            <p class="eyebrow mb-2">AI Coach</p>
+            <h5 class="mb-1">
+              <i class="bi bi-robot me-2 text-success"></i>Business Review Assistant
+            </h5>
+            <p class="text-muted mb-0">
+              Ask for trend reviews, expense-cutting ideas, next-month priorities, or growth suggestions.
+            </p>
+          </div>
+          <div class="assistant-actions">
+            <span class="assistant-status <%= aiEnabled ? "online" : "offline" %>">
+              <i class="bi <%= aiEnabled ? "bi-wifi" : "bi-wifi-off" %>"></i>
+              <%= aiEnabled ? `Connected to ${aiModel}` : "Setup required" %>
+            </span>
+            <button class="btn btn-outline-secondary btn-sm" id="assistantClear" type="button">
+              <i class="bi bi-arrow-clockwise me-1"></i>Clear chat
+            </button>
+          </div>
+        </div>
+
+        <div class="suggestion-row mb-3">
+          <button type="button" class="suggestion-chip" data-prompt="Review my business health in simple terms.">Business health</button>
+          <button type="button" class="suggestion-chip" data-prompt="What are the biggest spending risks in this business?">Spending risks</button>
+          <button type="button" class="suggestion-chip" data-prompt="Give me 3 smart actions for the next 30 days.">30-day actions</button>
+          <button type="button" class="suggestion-chip" data-prompt="Which category should I control first to improve profit?">Control one category</button>
+        </div>
+
+        <div class="assistant-messages" id="assistantMessages">
+          <div class="chat-message assistant">
+            <div class="chat-avatar">AI</div>
+            <div class="chat-bubble">
+              <% if (aiEnabled) { %>
+                I can review your current numbers, point out risks, and suggest practical next steps. Try asking about profit, expense control, or growth opportunities.
+              <% } else { %>
+                Add <code>GEMINI_API_KEY</code> to your <code>.env</code> file to enable the business coach. The chat UI is ready once the key is configured.
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <form id="assistantForm" class="assistant-form mt-3">
+          <label class="form-label fw-semibold" for="assistantInput">Ask the AI coach</label>
+          <div class="assistant-input-row">
+            <input
+              id="assistantInput"
+              class="form-control form-control-lg"
+              type="text"
+              maxlength="1500"
+              placeholder="Ask about profitability, category spend, or next steps"
+            >
+            <button class="btn btn-dark btn-lg" id="assistantSend" type="submit">
+              <i class="bi bi-send me-1"></i>Ask
+            </button>
+          </div>
+          <p class="text-muted small mb-0 mt-2">The assistant uses your saved transactions to answer in business terms and keeps the chat during this browser session.</p>
+        </form>
+      </section>
     </div>
   </div>
 </div>
 
 <%- include("partials/transaction-modal") %>
 
-<script id="monthly-data" type="application/json"><%- serializedMonthly %></script>
-<script id="category-data" type="application/json"><%- serializedCategoryBreakdown %></script>

@@ -4,19 +4,61 @@
       <i class="bi bi-arrow-left-right me-2 text-success"></i>Transactions
     </h1>
     <p class="section-subtitle mb-0">
-      Review every income and expense entry in one place.
+      Review, filter, and export every income and expense entry in one place.
     </p>
   </div>
-  <button
-    class="btn btn-success"
-    data-bs-toggle="modal"
-    data-bs-target="#addTransactionModal"
-  >
-    <i class="bi bi-plus-circle me-1"></i>Add Transaction
-  </button>
+  <div class="d-flex gap-2 flex-wrap">
+    <button
+      class="btn btn-success"
+      data-bs-toggle="modal"
+      data-bs-target="#addTransactionModal"
+    >
+      <i class="bi bi-plus-circle me-1"></i>Add Transaction
+    </button>
+    <button class="btn btn-outline-dark" id="exportTransactionsBtn" type="button">
+      <i class="bi bi-download me-1"></i>Export CSV
+    </button>
+  </div>
 </div>
 
-<%- include("partials/stats", { summary }) %>
+<div class="chart-card mb-4">
+  <div class="row g-3 align-items-end">
+    <div class="col-lg-5">
+      <label for="transactionSearch" class="form-label fw-semibold">Search</label>
+      <input id="transactionSearch" class="form-control" type="search" placeholder="Search category, note, source, or date">
+    </div>
+    <div class="col-md-3 col-lg-2">
+      <label for="transactionTypeFilter" class="form-label fw-semibold">Type</label>
+      <select id="transactionTypeFilter" class="form-select">
+        <option value="all">All</option>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+    </div>
+    <div class="col-md-4 col-lg-3">
+      <label for="transactionMethodFilter" class="form-label fw-semibold">Method</label>
+      <select id="transactionMethodFilter" class="form-select">
+        <option value="all">All methods</option>
+        <option value="cash">Cash</option>
+        <option value="upi">UPI</option>
+        <option value="bank">Bank Transfer</option>
+        <option value="card">Card</option>
+        <option value="none">No method</option>
+      </select>
+    </div>
+    <div class="col-lg-2">
+      <button id="resetTransactionFilters" class="btn btn-outline-secondary w-100" type="button">
+        Reset
+      </button>
+    </div>
+  </div>
+
+  <div class="transaction-toolbar mt-3">
+    <span class="filter-pill"><strong id="visibleTransactionCount"><%= transactions.length %></strong> visible</span>
+    <span class="filter-pill income"><strong id="visibleIncomeTotal">0</strong> income</span>
+    <span class="filter-pill expense"><strong id="visibleExpenseTotal">0</strong> expense</span>
+  </div>
+</div>
 
 <div class="chart-card">
   <div class="d-flex justify-content-between align-items-center mb-3">
@@ -32,6 +74,7 @@
     </div>
   <% } else { %>
     <%- include("partials/transactions-table", { transactions }) %>
+    <p class="text-muted small mt-3 mb-0 d-none" id="transactionNoResults">No transactions match the current filters.</p>
   <% } %>
 </div>
 

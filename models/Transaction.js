@@ -3,8 +3,10 @@
 const transactionSchema = new mongoose.Schema(
   {
     userId: {
-      type: String,
-      trim: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
     },
 
     type: {

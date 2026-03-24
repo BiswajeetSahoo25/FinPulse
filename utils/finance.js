@@ -112,6 +112,125 @@ function buildFinanceOverview(transactions = []) {
   };
 }
 
+function formatCurrencyValue(amount) {
+  return Number(amount || 0).toFixed(2);
+}
+
+function buildFinanceInsights({ summary, monthly, categoryBreakdown }) {
+  const monthEntries = Object.entries(monthly || {}).map(([key, entry]) => ({
+    key,
+    income: Number(entry.income) || 0,
+    expense: Number(entry.expense) || 0,
+    net: (Number(entry.income) || 0) - (Number(entry.expense) || 0),
+  }));
+  const sortedCategories = Object.entries(categoryBreakdown || {}).sort(
+    (first, second) => second[1] - first[1],
+  );
+  const strongestMonth = monthEntries.reduce((best, current) => {
+    if (!best || current.net > best.net) {
+      return current;
+    }
+
+    return best;
+  }, null);
+  const weakestMonth = monthEntries.reduce((worst, current) => {
+    if (!worst || current.net < worst.net) {
+      return current;
+    }
+
+    return worst;
+  }, null);
+  const topExpenseCategory = sortedCategories[0]
+    ? {
+        name: sortedCategories[0][0],
+        amount: sortedCategories[0][1],
+        share:
+          summary && summary.totalExpense > 0
+            ? (sortedCategories[0][1] / summary.totalExpense) * 100
+            : 0,
+      }
+    : null;
+
+  return {
+    trackedMonths: monthEntries.length,
+    averageMonthlyNet:
+      monthEntries.length > 0
+        ? monthEntries.reduce((total, entry) => total + entry.net, 0) /
+          monthEntries.length
+        : 0,
+    savingsRate:
+      summary && summary.totalIncome > 0
+        ? (summary.profit / summary.totalIncome) * 100
+        : 0,
+    strongestMonth,
+    weakestMonth,
+    topExpenseCategory,
+  };
+}
+
+function buildBusinessSnapshot({ summary, monthly, categoryBreakdown, transactions }) {
+  const monthKeys = Object.keys(monthly || {}).sort().reverse();
+  const categoryEntries = Object.entries(categoryBreakdown || {})
+    .sort((first, second) => second[1] - first[1])
+    .slice(0, 5);
+  const recentTransactions = (transactions || []).slice(0, 5);
+  const insights = buildFinanceInsights({ summary, monthly, categoryBreakdown });
+
+  const monthLines =
+    monthKeys.length > 0
+      ? monthKeys.slice(0, 4).map((key) => {
+          const entry = monthly[key];
+          const net = entry.income - entry.expense;
+          return `${key}: income INR ${formatCurrencyValue(entry.income)}, expense INR ${formatCurrencyValue(entry.expense)}, net INR ${formatCurrencyValue(net)}`;
+        })
+      : ["No monthly history recorded yet."];
+
+  const categoryLines =
+    categoryEntries.length > 0
+      ? categoryEntries.map(([name, amount]) => `${name}: INR ${formatCurrencyValue(amount)}`)
+      : ["No expense categories recorded yet."];
+
+  const recentLines =
+    recentTransactions.length > 0
+      ? recentTransactions.map((transaction) => {
+          const dateLabel =
+            transaction.date && !Number.isNaN(transaction.date.getTime())
+              ? transaction.date.toISOString().slice(0, 10)
+              : "unknown-date";
+
+          return `${dateLabel}: ${transaction.type} | ${transaction.category || "General"} | INR ${formatCurrencyValue(transaction.amount)} | ${transaction.method || "no method"}`;
+        })
+      : ["No recent transactions recorded yet."];
+
+  const insightLines = [
+    insights.strongestMonth
+      ? `Strongest month: ${insights.strongestMonth.key} with net INR ${formatCurrencyValue(insights.strongestMonth.net)}`
+      : "Strongest month: not enough data yet.",
+    insights.weakestMonth
+      ? `Weakest month: ${insights.weakestMonth.key} with net INR ${formatCurrencyValue(insights.weakestMonth.net)}`
+      : "Weakest month: not enough data yet.",
+    insights.topExpenseCategory
+      ? `Largest expense category: ${insights.topExpenseCategory.name} at ${insights.topExpenseCategory.share.toFixed(1)}% of total expense`
+      : "Largest expense category: not enough data yet.",
+  ];
+
+  return [
+    `Total income: INR ${formatCurrencyValue(summary?.totalIncome)}`,
+    `Total expense: INR ${formatCurrencyValue(summary?.totalExpense)}`,
+    `Net profit: INR ${formatCurrencyValue(summary?.profit)}`,
+    `Tracked transactions: ${(transactions || []).length}`,
+    `Savings rate: ${Number(insights.savingsRate || 0).toFixed(1)}%`,
+    "High-level insights:",
+    ...insightLines,
+    "Recent monthly performance:",
+    ...monthLines,
+    "Top expense categories:",
+    ...categoryLines,
+    "Most recent transactions:",
+    ...recentLines,
+  ].join("\n");
+}
+
 function serializeForInlineScript(value) {
   return JSON.stringify(value)
     .replace(/</g, "\\u003c")
@@ -124,6 +243,8 @@ function serializeForInlineScript(value) {
 module.exports = {
   VALID_PAYMENT_METHODS,
   VALID_TRANSACTION_TYPES,
+  buildBusinessSnapshot,
+  buildFinanceInsights,
   buildFinanceOverview,
   normalizeTransactionInput,
   serializeForInlineScript,
