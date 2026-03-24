@@ -2,15 +2,18 @@ const express = require("express");
 const mongoose = require("mongoose");
 const Transaction = require("./models/Transaction.js");
 // const bodyParser = require("body-parser");
+const expressLayouts = require("express-ejs-layouts");
 require("dotenv").config();
 
 const app = express();
+
 
 // Middleware
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.set("view engine", "ejs");
 app.use(express.static("public"));
+app.use(expressLayouts);
 
 // DB connection
 mongoose
