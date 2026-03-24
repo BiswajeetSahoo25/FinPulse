@@ -155,9 +155,22 @@ app.get("/dashboard", async (req, res) => {
     let totalIncome = 0;
     let totalExpense = 0;
 
+    const monthly = {};
+
     transactions.forEach((t) => {
       if (t.type === "income") totalIncome += t.amount;
       else totalExpense += t.amount;
+
+      const date = new Date(t.date);
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const key = `${date.getFullYear()}-${month}`;
+
+      if (!monthly[key]) {
+        monthly[key] = { income: 0, expense: 0 };
+      }
+
+      if (t.type === "income") monthly[key].income += t.amount;
+      else monthly[key].expense += t.amount;
     });
 
     const summary = {
@@ -166,7 +179,7 @@ app.get("/dashboard", async (req, res) => {
       profit: totalIncome - totalExpense,
     };
 
-    res.render("dashboard", { summary });
+    res.render("dashboard", { summary, monthly });
   } catch (err) {
     res.send(err.message);
   }
