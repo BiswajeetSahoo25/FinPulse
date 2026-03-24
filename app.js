@@ -20,7 +20,7 @@ mongoose
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("FinPulse is running 🚀");
+  res.send("FinPulse is running ");
 });
 
 // TRANSACTION
@@ -34,7 +34,6 @@ app.post("/transactions", async (req, res) => {
       return res.status(400).json({
         error: "Type and amount are required",
       });
-      4;
     }
 
     // Create transaction
@@ -51,7 +50,7 @@ app.post("/transactions", async (req, res) => {
     await newTransaction.save();
 
     res.status(201).json({
-      message: "Transaction saved successfully ✅",
+      message: "Transaction saved successfully",
       data: newTransaction,
     });
   } catch (err) {
@@ -114,9 +113,12 @@ app.get("/analytics", async (req, res) => {
 
     transactions.forEach((t) => {
       const date = new Date(t.date);
-      const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
-      // 📅 Monthly grouping
+      // Proper month formatting (YYYY-MM)
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const monthKey = `${date.getFullYear()}-${month}`;
+
+      // Monthly grouping
       if (!monthly[monthKey]) {
         monthly[monthKey] = { income: 0, expense: 0 };
       }
@@ -127,7 +129,7 @@ app.get("/analytics", async (req, res) => {
         monthly[monthKey].expense += t.amount;
       }
 
-      // 📊 Category breakdown (expenses only)
+      // Category breakdown (expenses only)
       if (t.type === "expense") {
         const cat = t.category || "other";
         categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + t.amount;
@@ -143,6 +145,8 @@ app.get("/analytics", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
 // const transactionRoutes = require("./routes/transactionRoutes");
 
 // app.use("/transactions", transactionRoutes);
