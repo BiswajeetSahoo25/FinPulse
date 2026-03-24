@@ -1,22 +1,44 @@
 <aside class="sidebar">
-  <div class="brand-block">
-    <div class="brand-mark">FP</div>
-    <div>
-      <p class="eyebrow">Fintech MVP</p>
-      <h2>FinPulse</h2>
+  <div class="sidebar-top">
+    <div class="brand-block">
+      <div class="brand-mark">FP</div>
+      <div>
+        <p class="eyebrow sidebar-eyebrow">Fintech MVP</p>
+        <h2>FinPulse</h2>
+      </div>
     </div>
-  </div>
 
-  <nav class="sidebar-nav">
-    <a
-      class="nav-link <%= currentPath === '/dashboard' ? 'active' : '' %>"
-      href="/dashboard#dashboard-overview"
-    >
-      Dashboard
-    </a>
-    <a class="nav-link" href="/dashboard#transactions-section">Transactions</a>
-    <a class="nav-link" href="/dashboard#analytics-section">Analytics</a>
-  </nav>
+    <p class="sidebar-copy">
+      Simple, explainable business finance tracking for fast-moving demo days.
+    </p>
+
+    <nav class="sidebar-nav">
+      <a
+        class="nav-link"
+        href="/dashboard#dashboard-overview"
+        data-nav-target="dashboard-overview"
+      >
+        <span>Dashboard</span>
+        <small>Overview</small>
+      </a>
+      <a
+        class="nav-link"
+        href="/dashboard#transactions-section"
+        data-nav-target="transactions-section"
+      >
+        <span>Transactions</span>
+        <small>Cash flow</small>
+      </a>
+      <a
+        class="nav-link"
+        href="/dashboard#analytics-section"
+        data-nav-target="analytics-section"
+      >
+        <span>Analytics</span>
+        <small>Insights</small>
+      </a>
+    </nav>
+  </div>
 
   <div class="sidebar-footer">
     <div class="user-chip">
@@ -31,6 +53,6 @@
       </div>
     </div>
 
-    <a class="logout-link" href="/logout">Logout</a>
+    <a class="logout-link" href="/logout">Sign out</a>
   </div>
 </aside>

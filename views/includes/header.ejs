@@ -1,14 +1,13 @@
 <header class="topbar">
-  <div>
-    <p class="eyebrow">Business pulse</p>
-    <h1><%= pageTitle || "Dashboard" %></h1>
+  <div class="topbar-copy">
+    <p class="eyebrow">Live business workspace</p>
+    <div class="identity-stack">
+      <h1><%= currentUser.businessName %></h1>
+      <p class="identity-meta"><%= currentUser.name %> managing the FinPulse dashboard</p>
+    </div>
   </div>
 
   <div class="profile-card">
-    <div class="profile-copy">
-      <strong><%= currentUser.name %></strong>
-      <span><%= currentUser.businessName %></span>
-    </div>
     <img
       src="<%= currentUser.avatar %>"
       alt="<%= currentUser.name %>"

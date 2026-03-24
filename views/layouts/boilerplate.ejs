@@ -27,8 +27,69 @@
           <main class="page-shell">
             <%- body %>
           </main>
+
+          <%- include("../includes/footer") %>
         </div>
       </div>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          const navLinks = Array.from(
+            document.querySelectorAll(".nav-link[data-nav-target]")
+          );
+
+          if (!navLinks.length) {
+            return;
+          }
+
+          const setActiveLink = (targetId) => {
+            navLinks.forEach((link) => {
+              const isActive = link.dataset.navTarget === targetId;
+              link.classList.toggle("active", isActive);
+              link.setAttribute("aria-current", isActive ? "page" : "false");
+            });
+          };
+
+          const observedSections = navLinks
+            .map((link) => document.getElementById(link.dataset.navTarget))
+            .filter(Boolean);
+
+          const defaultTarget = "dashboard-overview";
+          const currentHash = window.location.hash.replace("#", "");
+          setActiveLink(currentHash || defaultTarget);
+
+          navLinks.forEach((link) => {
+            link.addEventListener("click", () => {
+              setActiveLink(link.dataset.navTarget);
+            });
+          });
+
+          if (observedSections.length) {
+            const observer = new IntersectionObserver(
+              (entries) => {
+                const visibleSection = entries
+                  .filter((entry) => entry.isIntersecting)
+                  .sort((entryA, entryB) => entryB.intersectionRatio - entryA.intersectionRatio)[0];
+
+                if (visibleSection) {
+                  setActiveLink(visibleSection.target.id);
+                }
+              },
+              {
+                rootMargin: "-24% 0px -52% 0px",
+                threshold: [0.2, 0.45, 0.7],
+              }
+            );
+
+            observedSections.forEach((section) => observer.observe(section));
+          }
+
+          window.addEventListener("hashchange", () => {
+            const nextHash = window.location.hash.replace("#", "");
+            setActiveLink(nextHash || defaultTarget);
+          });
+        });
+      </script>
     <% } %>
   </body>
 </html>
