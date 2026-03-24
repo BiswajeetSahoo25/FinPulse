@@ -75,6 +75,7 @@ app.get("/transactions", async (req, res) => {
   }
 });
 
+//SUMMARY
 app.get("/summary", async (req, res) => {
   try {
     const transactions = await Transaction.find();
@@ -102,6 +103,46 @@ app.get("/summary", async (req, res) => {
   }
 });
 
+
+//ANALYTICS
+app.get("/analytics", async (req, res) => {
+  try {
+    const transactions = await Transaction.find();
+
+    const monthly = {};
+    const categoryBreakdown = {};
+
+    transactions.forEach((t) => {
+      const date = new Date(t.date);
+      const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+
+      // 📅 Monthly grouping
+      if (!monthly[monthKey]) {
+        monthly[monthKey] = { income: 0, expense: 0 };
+      }
+
+      if (t.type === "income") {
+        monthly[monthKey].income += t.amount;
+      } else {
+        monthly[monthKey].expense += t.amount;
+      }
+
+      // 📊 Category breakdown (expenses only)
+      if (t.type === "expense") {
+        const cat = t.category || "other";
+        categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + t.amount;
+      }
+    });
+
+    res.json({
+      monthly,
+      categoryBreakdown,
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 // const transactionRoutes = require("./routes/transactionRoutes");
 
 // app.use("/transactions", transactionRoutes);
