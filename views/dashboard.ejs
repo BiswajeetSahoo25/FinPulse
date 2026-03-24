@@ -1,16 +1,38 @@
+<%
+  const categoryPalette = ["#1d7a58", "#0f766e", "#f97316", "#f59e0b", "#ef4444", "#6366f1"];
+  const expenseBreakdown = Object.entries(analytics.categoryBreakdown).sort((entryA, entryB) => entryB[1] - entryA[1]);
+  const topExpense = expenseBreakdown[0];
+  const latestTransaction = transactions[0];
+%>
+
 <section id="dashboard-overview" class="hero-panel">
   <div>
     <p class="eyebrow">Financial health at a glance</p>
-    <h2>Track cash flow, spot trends, and keep your business moving.</h2>
+    <h2>Clean signals for income, expense, and profit.</h2>
     <p class="hero-text">
-      FinPulse gives <%= user.businessName %> a lightweight control center for
-      income, expenses, and category insights.
+      FinPulse keeps <%= user.businessName %> ready for demos and day-to-day decisions
+      with a fast, explainable dashboard.
     </p>
   </div>
 
   <div class="hero-badge">
-    <span>Owner</span>
-    <strong><%= user.name %></strong>
+    <div>
+      <span>Top expense</span>
+      <strong><%= topExpense ? topExpense[0] : "No expense data yet" %></strong>
+    </div>
+    <p class="hero-badge-copy">
+      <%= topExpense ? `${formatCurrency(topExpense[1])} spent in your biggest category.` : "Add an expense to unlock category insights." %>
+    </p>
+    <% if (latestTransaction) { %>
+      <div class="hero-mini-stat">
+        <span>Latest activity</span>
+        <strong><%= latestTransaction.category %></strong>
+        <small>
+          <%= latestTransaction.type %> on
+          <%= new Date(latestTransaction.date).toLocaleDateString("en-IN") %>
+        </small>
+      </div>
+    <% } %>
   </div>
 </section>
 
@@ -38,30 +60,6 @@
   </article>
 </section>
 
-<section id="analytics-section" class="content-grid">
-  <article class="panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Monthly movement</p>
-        <h3>Income vs expense</h3>
-      </div>
-      <span class="pill neutral-pill">Bar chart</span>
-    </div>
-    <canvas id="monthlyChart" height="140"></canvas>
-  </article>
-
-  <article class="panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Expense split</p>
-        <h3>Category breakdown</h3>
-      </div>
-      <span class="pill neutral-pill">Pie chart</span>
-    </div>
-    <canvas id="categoryChart" height="140"></canvas>
-  </article>
-</section>
-
 <section id="transactions-section" class="content-grid transactions-grid">
   <article class="panel">
     <div class="section-heading">
@@ -69,6 +67,7 @@
         <p class="eyebrow">Quick entry</p>
         <h3>Add a new transaction</h3>
       </div>
+      <span class="pill neutral-pill">Simple form</span>
     </div>
 
     <form action="/transactions" method="POST" class="transaction-form">
@@ -172,10 +171,10 @@
                 </td>
                 <td><%= transaction.category %></td>
                 <td><%= transaction.method %></td>
-                <td><%= transaction.source || '-' %></td>
-                <td><%= new Date(transaction.date).toLocaleDateString('en-IN') %></td>
+                <td><%= transaction.source || "-" %></td>
+                <td><%= new Date(transaction.date).toLocaleDateString("en-IN") %></td>
                 <td class="<%= transaction.type === 'income' ? 'amount-positive' : 'amount-negative' %>">
-                  <%= transaction.type === 'income' ? '+' : '-' %><%= formatCurrency(transaction.amount) %>
+                  <%= transaction.type === "income" ? "+" : "-" %><%= formatCurrency(transaction.amount) %>
                 </td>
               </tr>
             <% }) %>
@@ -186,21 +185,80 @@
   </article>
 </section>
 
+<section id="analytics-section" class="content-grid analytics-grid">
+  <article class="panel chart-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Monthly movement</p>
+        <h3>Income vs expense</h3>
+      </div>
+      <span class="pill neutral-pill">Bar chart</span>
+    </div>
+
+    <div class="chart-shell">
+      <canvas id="monthlyChart" height="140"></canvas>
+    </div>
+  </article>
+
+  <article class="panel chart-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Expense split</p>
+        <h3>Category breakdown</h3>
+      </div>
+      <span class="pill neutral-pill">Doughnut</span>
+    </div>
+
+    <div class="chart-shell chart-shell-compact">
+      <canvas id="categoryChart" height="140"></canvas>
+      <div class="chart-empty" id="categoryChartEmpty" hidden>
+        Add an expense transaction to see category distribution.
+      </div>
+    </div>
+
+    <% if (expenseBreakdown.length) { %>
+      <div class="category-list">
+        <% expenseBreakdown.forEach((entry, index) => { %>
+          <div class="category-row">
+            <span class="category-label">
+              <span
+                class="category-dot"
+                style="background-color: <%= categoryPalette[index % categoryPalette.length] %>"
+              ></span>
+              <%= entry[0] %>
+            </span>
+            <strong><%= formatCurrency(entry[1]) %></strong>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </article>
+</section>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   const monthlyData = <%- JSON.stringify(analytics.monthly) %>;
   const categoryBreakdown = <%- JSON.stringify(analytics.categoryBreakdown) %>;
+  const categoryPalette = <%- JSON.stringify(categoryPalette) %>;
 
   const monthlyLabels = Object.keys(monthlyData);
   const monthlyIncome = monthlyLabels.map((label) => monthlyData[label].income);
   const monthlyExpense = monthlyLabels.map((label) => monthlyData[label].expense);
 
-  const hasCategoryData = Object.keys(categoryBreakdown).length > 0;
-  const categoryLabels = hasCategoryData ? Object.keys(categoryBreakdown) : ["No expenses yet"];
-  const categoryValues = hasCategoryData ? Object.values(categoryBreakdown) : [1];
+  const categoryEntries = Object.entries(categoryBreakdown).sort(
+    (entryA, entryB) => entryB[1] - entryA[1]
+  );
+  const categoryLabels = categoryEntries.map((entry) => entry[0]);
+  const categoryValues = categoryEntries.map((entry) => entry[1]);
 
   const monthlyChartContext = document.getElementById("monthlyChart");
   const categoryChartContext = document.getElementById("categoryChart");
+  const categoryChartEmpty = document.getElementById("categoryChartEmpty");
+  const currencyFormatter = new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  });
 
   new Chart(monthlyChartContext, {
     type: "bar",
@@ -210,23 +268,41 @@
         {
           label: "Income",
           data: monthlyIncome,
-          backgroundColor: "#22c55e",
+          backgroundColor: "#1d7a58",
           borderRadius: 12,
+          maxBarThickness: 34,
         },
         {
           label: "Expense",
           data: monthlyExpense,
-          backgroundColor: "#f87171",
+          backgroundColor: "#ef4444",
           borderRadius: 12,
+          maxBarThickness: 34,
         },
       ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: "index",
+        intersect: false,
+      },
       plugins: {
         legend: {
           position: "top",
+          labels: {
+            boxWidth: 12,
+            usePointStyle: true,
+            pointStyle: "circle",
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label(context) {
+              return `${context.dataset.label}: ${currencyFormatter.format(context.parsed.y || 0)}`;
+            },
+          },
         },
       },
       scales: {
@@ -234,36 +310,61 @@
           grid: {
             display: false,
           },
+          ticks: {
+            color: "#6b6b73",
+          },
         },
         y: {
           beginAtZero: true,
+          ticks: {
+            color: "#6b6b73",
+            callback(value) {
+              return currencyFormatter.format(value);
+            },
+          },
+          grid: {
+            color: "rgba(24, 24, 27, 0.08)",
+          },
         },
       },
     },
   });
 
-  new Chart(categoryChartContext, {
-    type: "pie",
-    data: {
-      labels: categoryLabels,
-      datasets: [
-        {
-          data: categoryValues,
-          backgroundColor: hasCategoryData
-            ? ["#f87171", "#fb7185", "#f59e0b", "#fbbf24", "#fca5a5", "#fdba74"]
-            : ["#d1d5db"],
-          borderWidth: 0,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: "bottom",
+  if (categoryLabels.length) {
+    new Chart(categoryChartContext, {
+      type: "doughnut",
+      data: {
+        labels: categoryLabels,
+        datasets: [
+          {
+            data: categoryValues,
+            backgroundColor: categoryLabels.map((_, index) => categoryPalette[index % categoryPalette.length]),
+            borderColor: "#f7f5ef",
+            borderWidth: 4,
+            hoverOffset: 12,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "62%",
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            callbacks: {
+              label(context) {
+                return `${context.label}: ${currencyFormatter.format(context.parsed || 0)}`;
+              },
+            },
+          },
         },
       },
-    },
-  });
+    });
+  } else {
+    categoryChartContext.hidden = true;
+    categoryChartEmpty.hidden = false;
+  }
 </script>

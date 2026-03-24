@@ -333,6 +333,23 @@ textarea {
   color: rgba(255, 255, 255, 0.6);
 }
 
+.hero-badge-copy {
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.7;
+}
+
+.hero-mini-stat {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hero-mini-stat small {
+  color: rgba(255, 255, 255, 0.62);
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -381,9 +398,18 @@ textarea {
   align-items: start;
 }
 
+.analytics-grid {
+  align-items: start;
+}
+
 .panel {
   padding: 24px;
   border-radius: var(--radius-xl);
+}
+
+.chart-panel {
+  display: grid;
+  align-content: start;
 }
 
 .section-heading {
@@ -398,6 +424,26 @@ textarea {
 
 .section-heading .eyebrow {
   color: var(--brand);
+}
+
+.chart-shell {
+  position: relative;
+  min-height: 320px;
+}
+
+.chart-shell-compact {
+  min-height: 280px;
+}
+
+.chart-empty {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  padding: 18px;
+  text-align: center;
+  color: var(--muted);
+  border-radius: 22px;
+  background: rgba(245, 243, 238, 0.82);
 }
 
 .pill {
@@ -481,6 +527,36 @@ textarea:focus {
 
 .table-wrapper {
   overflow-x: auto;
+}
+
+.category-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(245, 243, 238, 0.88);
+}
+
+.category-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+}
+
+.category-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .transaction-table {
