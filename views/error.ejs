@@ -1,0 +1,14 @@
+﻿<div class="chart-card">
+  <div class="empty-state py-5">
+    <div>
+      <h1 class="page-title mb-2">Something went wrong</h1>
+      <p class="section-subtitle mb-3"><%= message %></p>
+      <% if (typeof details !== "undefined" && details) { %>
+        <pre class="text-start bg-light border rounded p-3 mb-3"><%= details %></pre>
+      <% } %>
+      <a href="/dashboard" class="btn btn-dark">
+        <i class="bi bi-arrow-left me-1"></i>Return to Dashboard
+      </a>
+    </div>
+  </div>
+</div>

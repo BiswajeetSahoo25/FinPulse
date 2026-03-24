@@ -1,190 +1,213 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const Transaction = require("./models/Transaction.js");
 const expressLayouts = require("express-ejs-layouts");
+const mongoose = require("mongoose");
+const path = require("node:path");
+
+const Transaction = require("./models/Transaction");
+const {
+  buildFinanceOverview,
+  normalizeTransactionInput,
+  serializeForInlineScript,
+} = require("./utils/finance");
+
 require("dotenv").config();
 
-const app = express();
+mongoose.set("strictQuery", true);
 
-// Middleware
+const app = express();
+app.disable("x-powered-by");
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
+
 app.set("view engine", "ejs");
-app.use(express.static("public"));
+app.set("views", path.join(__dirname, "views"));
 app.use(expressLayouts);
 app.set("layout", "layouts/boilerplate");
 
-// DB connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
-
-// Routes
-app.get("/", (req, res) => {
-  res.send("FinPulse is running");
+app.use((req, res, next) => {
+  res.locals.currentPath = req.path;
+  next();
 });
 
-// TRANSACTION
-//Create
-app.post("/transactions", async (req, res) => {
-  try {
-    const { type, amount, category, method, source, note } = req.body;
+async function getFinancePageData() {
+  const transactions = await Transaction.find()
+    .sort({ date: -1, createdAt: -1 })
+    .lean();
 
-    //  Basic validation
-    if (!type || !amount) {
+  const overview = buildFinanceOverview(transactions);
+
+  return {
+    ...overview,
+    serializedMonthly: serializeForInlineScript(overview.monthly),
+    serializedCategoryBreakdown: serializeForInlineScript(
+      overview.categoryBreakdown,
+    ),
+  };
+}
+
+async function createTransaction(req, res, next) {
+  try {
+    const { errors, value } = normalizeTransactionInput(req.body);
+
+    if (errors.length > 0) {
       return res.status(400).json({
-        error: "Type and amount are required",
+        error: errors.join(" "),
       });
     }
 
-    // Create transaction
-    const newTransaction = new Transaction({
-      userId: "demoUser", // temporary (we’ll improve later)
-      type,
-      amount,
-      category,
-      method,
-      source,
-      note,
+    const transaction = await Transaction.create({
+      userId: "demoUser",
+      ...value,
     });
 
-    await newTransaction.save();
-
-    res.status(201).json({
+    return res.status(201).json({
       message: "Transaction saved successfully",
-      data: newTransaction,
+      data: transaction,
     });
-  } catch (err) {
-    res.status(500).json({
-      error: err.message,
-    });
+  } catch (error) {
+    return next(error);
   }
+}
+
+app.get("/", (_req, res) => {
+  res.redirect("/dashboard");
 });
 
-//Get
-app.get("/transactions", async (req, res) => {
+app.post("/transactions", createTransaction);
+app.post("/api/transactions", createTransaction);
+
+app.get("/api/transactions", async (_req, res, next) => {
   try {
-    const transactions = await Transaction.find();
+    const { transactions } = await getFinancePageData();
 
     res.json({
       count: transactions.length,
       data: transactions,
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    next(error);
   }
 });
 
-//SUMMARY
-app.get("/summary", async (req, res) => {
+app.get("/api/summary", async (_req, res, next) => {
   try {
-    const transactions = await Transaction.find();
-
-    let totalIncome = 0;
-    let totalExpense = 0;
-
-    transactions.forEach((t) => {
-      if (t.type === "income") {
-        totalIncome += t.amount;
-      } else if (t.type === "expense") {
-        totalExpense += t.amount;
-      }
-    });
-
-    const profit = totalIncome - totalExpense;
-
-    res.json({
-      totalIncome,
-      totalExpense,
-      profit,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const { summary } = await getFinancePageData();
+    res.json(summary);
+  } catch (error) {
+    next(error);
   }
 });
 
-//ANALYTICS
-app.get("/analytics", async (req, res) => {
+app.get("/api/analytics", async (_req, res, next) => {
   try {
-    const transactions = await Transaction.find();
-
-    const monthly = {};
-    const categoryBreakdown = {};
-
-    transactions.forEach((t) => {
-      const date = new Date(t.date);
-
-      // Proper month formatting (YYYY-MM)
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const monthKey = `${date.getFullYear()}-${month}`;
-
-      // Monthly grouping
-      if (!monthly[monthKey]) {
-        monthly[monthKey] = { income: 0, expense: 0 };
-      }
-
-      if (t.type === "income") {
-        monthly[monthKey].income += t.amount;
-      } else {
-        monthly[monthKey].expense += t.amount;
-      }
-
-      // Category breakdown (expenses only)
-      if (t.type === "expense") {
-        const cat = t.category || "other";
-        categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + t.amount;
-      }
-    });
+    const { monthly, categoryBreakdown } = await getFinancePageData();
 
     res.json({
       monthly,
       categoryBreakdown,
     });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    next(error);
   }
 });
 
-// DASHBOARD
-app.get("/dashboard", async (req, res) => {
+app.get("/dashboard", async (_req, res, next) => {
   try {
-    const transactions = await Transaction.find();
+    const data = await getFinancePageData();
 
-    let totalIncome = 0;
-    let totalExpense = 0;
-    const monthly = {};
-    const categoryBreakdown = {};
-
-    transactions.forEach((t) => {
-      if (t.type === "income") totalIncome += t.amount;
-      else totalExpense += t.amount;
-
-      // Monthly grouping
-      const date = new Date(t.date);
-      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-      if (!monthly[key]) monthly[key] = { income: 0, expense: 0 };
-      if (t.type === "income") monthly[key].income += t.amount;
-      else monthly[key].expense += t.amount;
-
-      // Category breakdown (expenses only)
-      if (t.type === "expense") {
-        const cat = t.category || "other";
-        categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + t.amount;
-      }
+    res.render("dashboard", {
+      pageTitle: "Dashboard",
+      ...data,
     });
-
-    const summary = {
-      totalIncome,
-      totalExpense,
-      profit: totalIncome - totalExpense,
-    };
-
-    res.render("dashboard", { summary, monthly, categoryBreakdown });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    next(error);
   }
 });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.get("/transactions", async (_req, res, next) => {
+  try {
+    const data = await getFinancePageData();
+
+    res.render("transactions", {
+      pageTitle: "Transactions",
+      ...data,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/summary", async (_req, res, next) => {
+  try {
+    const data = await getFinancePageData();
+
+    res.render("summary", {
+      pageTitle: "Summary",
+      ...data,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/analytics", async (_req, res, next) => {
+  try {
+    const data = await getFinancePageData();
+
+    res.render("analytics", {
+      pageTitle: "Analytics",
+      ...data,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.use((req, res) => {
+  res.status(404).render("404", {
+    pageTitle: "Page Not Found",
+  });
+});
+
+app.use((error, req, res, _next) => {
+  console.error(error);
+
+  if (req.path.startsWith("/api/") || req.method !== "GET") {
+    return res.status(500).json({
+      error: "Internal server error",
+    });
+  }
+
+  return res.status(500).render("error", {
+    pageTitle: "Something Went Wrong",
+    message: "Something went wrong while loading this page.",
+    details: process.env.NODE_ENV === "development" ? error.message : undefined,
+  });
+});
+
+async function startServer() {
+  const mongoUri = process.env.MONGO_URI;
+  const port = Number(process.env.PORT) || 8080;
+
+  if (!mongoUri) {
+    throw new Error("MONGO_URI is not set in the environment.");
+  }
+
+  await mongoose.connect(mongoUri);
+  console.log("MongoDB Connected");
+
+  return app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error("Failed to start FinPulse:", error.message);
+    process.exit(1);
+  });
+}
+
+module.exports = { app, startServer };

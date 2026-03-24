@@ -1,0 +1,49 @@
+﻿<%
+  function formatDate(value) {
+    if (!value || Number.isNaN(value.getTime())) {
+      return "Unknown";
+    }
+
+    return value.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
+%>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle finance-table">
+    <thead class="table-dark">
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Method</th>
+        <th>Source</th>
+        <th>Note</th>
+        <th class="text-end">Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% transactions.forEach((transaction) => { %>
+        <tr>
+          <td class="fw-semibold"><%= formatDate(transaction.date) %></td>
+          <td>
+            <span class="type-pill <%= transaction.type %>">
+              <i class="bi <%= transaction.type === "income" ? "bi-arrow-up-right" : "bi-arrow-down-right" %>"></i>
+              <%= transaction.type %>
+            </span>
+          </td>
+          <td><%= transaction.category || "General" %></td>
+          <td><%= transaction.method ? transaction.method.toUpperCase() : "--" %></td>
+          <td><%= transaction.source || "--" %></td>
+          <td class="text-muted"><%= transaction.note || "--" %></td>
+          <td class="text-end fw-semibold <%= transaction.type === "income" ? "text-success" : "text-danger" %>">
+            <%= transaction.type === "income" ? "+" : "-" %>&#8377;<%= transaction.amount.toLocaleString("en-IN") %>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>

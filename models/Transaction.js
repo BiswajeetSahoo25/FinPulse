@@ -1,36 +1,47 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
 
 const transactionSchema = new mongoose.Schema(
   {
     userId: {
-      type: String, // later can be ObjectId
+      type: String,
+      trim: true,
     },
 
     type: {
       type: String,
       enum: ["income", "expense"],
       required: true,
+      trim: true,
     },
 
     amount: {
       type: Number,
       required: true,
+      min: 0.01,
     },
 
     category: {
-      type: String, // food, rent, sales
+      type: String,
+      trim: true,
+      maxlength: 60,
     },
 
     method: {
-      type: String, // upi, cash, bank
+      type: String,
+      trim: true,
+      enum: ["cash", "upi", "bank", "card", null],
     },
 
     source: {
-      type: String, // customer UPI id or "offline"
+      type: String,
+      trim: true,
+      maxlength: 80,
     },
 
     note: {
-      type: String, // free text (customer, product, etc.)
+      type: String,
+      trim: true,
+      maxlength: 300,
     },
 
     date: {

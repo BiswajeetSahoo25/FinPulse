@@ -1,0 +1,57 @@
+﻿<%
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthlyKeys = Object.keys(monthly).sort().reverse();
+  function formatMonth(key) {
+    const [year, month] = key.split("-");
+    return `${MONTHS[Number(month) - 1]} ${year}`;
+  }
+%>
+
+<div class="chart-card h-100">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">
+      <i class="bi bi-calendar3 me-2 text-secondary"></i>Monthly Breakdown
+    </h5>
+    <span class="text-muted small"><%= monthlyKeys.length %> recorded month<%= monthlyKeys.length === 1 ? "" : "s" %></span>
+  </div>
+
+  <% if (monthlyKeys.length === 0) { %>
+    <div class="empty-state py-5">
+      <p class="mb-0">No monthly data yet. Add some transactions to see the trend.</p>
+    </div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle finance-table">
+        <thead class="table-dark">
+          <tr>
+            <th>Month</th>
+            <th class="text-success">Income</th>
+            <th class="text-danger">Expense</th>
+            <th>Net</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% monthlyKeys.forEach((key) => {
+            const entry = monthly[key];
+            const net = entry.income - entry.expense;
+          %>
+            <tr>
+              <td class="fw-semibold"><%= formatMonth(key) %></td>
+              <td class="text-success">&#8377;<%= entry.income.toLocaleString("en-IN") %></td>
+              <td class="text-danger">&#8377;<%= entry.expense.toLocaleString("en-IN") %></td>
+              <td class="fw-semibold <%= net >= 0 ? "text-success" : "text-danger" %>">
+                <%= net >= 0 ? "+" : "-" %>&#8377;<%= Math.abs(net).toLocaleString("en-IN") %>
+              </td>
+              <td>
+                <span class="badge <%= net >= 0 ? "bg-success" : "bg-danger" %>">
+                  <%= net >= 0 ? "Profit" : "Loss" %>
+                </span>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</div>

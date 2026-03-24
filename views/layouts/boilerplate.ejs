@@ -1,16 +1,16 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FinPulse</title>
+  <title><%= pageTitle ? `${pageTitle} | FinPulse` : "FinPulse" %></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+  <% const isActive = (path) => currentPath === path ? "active" : ""; %>
 
-  <!-- Top Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top px-4">
     <a class="navbar-brand fw-bold fs-4" href="/dashboard">
       <i class="bi bi-bar-chart-fill me-2 text-success"></i>FinPulse
@@ -20,49 +20,44 @@
     </div>
   </nav>
 
-  <!-- Layout Wrapper -->
   <div class="d-flex" id="wrapper">
-
-    <!-- Sidebar -->
     <nav id="sidebar" class="bg-dark">
       <ul class="nav flex-column pt-2">
         <li class="nav-item">
-          <a class="nav-link text-white" href="/dashboard">
+          <a class="nav-link text-white <%= isActive('/dashboard') %>" href="/dashboard">
             <i class="bi bi-speedometer2 me-2"></i> Dashboard
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white" href="/transactions">
+          <a class="nav-link text-white <%= isActive('/transactions') %>" href="/transactions">
             <i class="bi bi-arrow-left-right me-2"></i> Transactions
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white" href="/analytics">
+          <a class="nav-link text-white <%= isActive('/analytics') %>" href="/analytics">
             <i class="bi bi-graph-up me-2"></i> Analytics
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white" href="/summary">
+          <a class="nav-link text-white <%= isActive('/summary') %>" href="/summary">
             <i class="bi bi-list-check me-2"></i> Summary
           </a>
         </li>
       </ul>
     </nav>
 
-    <!-- Page Content -->
     <div id="page-content-wrapper">
       <%- body %>
     </div>
-
   </div>
 
-  <!-- Footer -->
   <footer id="footer" class="bg-dark text-white-50 text-center py-3">
-    <small><i class="bi bi-lightning-charge-fill text-warning me-1"></i>&copy; 2025 FinPulse &mdash; Built for Hackathon</small>
+    <small><i class="bi bi-lightning-charge-fill text-warning me-1"></i>&copy; <%= new Date().getFullYear() %> FinPulse - Built for Hackathon</small>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/transactions.js"></script>
 </body>
-</html>
 </html>

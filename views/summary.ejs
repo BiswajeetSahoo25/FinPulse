@@ -1,0 +1,93 @@
+﻿<%
+  const topCategories = Object.entries(categoryBreakdown)
+    .sort((first, second) => second[1] - first[1])
+    .slice(0, 5);
+  const monthlyKeys = Object.keys(monthly).sort().reverse();
+  const latestMonthKey = monthlyKeys[0];
+  const latestMonth = latestMonthKey ? monthly[latestMonthKey] : null;
+  const [latestYear, latestMonthNumber] = latestMonthKey ? latestMonthKey.split("-") : [];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const latestMonthLabel = latestMonthKey ? `${monthNames[Number(latestMonthNumber) - 1]} ${latestYear}` : "No data yet";
+%>
+
+<div class="page-header d-flex justify-content-between align-items-start gap-3 mb-4">
+  <div>
+    <h1 class="page-title">
+      <i class="bi bi-list-check me-2 text-success"></i>Summary
+    </h1>
+    <p class="section-subtitle mb-0">
+      A clean snapshot of the business so you can spot profit trends quickly.
+    </p>
+  </div>
+  <a href="/analytics" class="btn btn-outline-dark">
+    <i class="bi bi-graph-up me-1"></i>Open Analytics
+  </a>
+</div>
+
+<%- include("partials/stats", { summary }) %>
+
+<div class="row g-4 mb-4">
+  <div class="col-lg-6">
+    <div class="chart-card h-100">
+      <h5 class="mb-3">
+        <i class="bi bi-calendar-event me-2 text-primary"></i>Latest Recorded Month
+      </h5>
+
+      <% if (!latestMonth) { %>
+        <div class="empty-state py-5">
+          <p class="mb-0">No monthly rollup available yet.</p>
+        </div>
+      <% } else { %>
+        <ul class="metric-list">
+          <li>
+            <span class="metric-label">Month</span>
+            <span class="metric-value"><%= latestMonthLabel %></span>
+          </li>
+          <li>
+            <span class="metric-label">Income</span>
+            <span class="metric-value text-success">&#8377;<%= latestMonth.income.toLocaleString("en-IN") %></span>
+          </li>
+          <li>
+            <span class="metric-label">Expense</span>
+            <span class="metric-value text-danger">&#8377;<%= latestMonth.expense.toLocaleString("en-IN") %></span>
+          </li>
+          <li>
+            <span class="metric-label">Net Result</span>
+            <span class="metric-value <%= latestMonth.income - latestMonth.expense >= 0 ? "text-success" : "text-danger" %>">
+              <%= latestMonth.income - latestMonth.expense >= 0 ? "+" : "-" %>&#8377;<%= Math.abs(latestMonth.income - latestMonth.expense).toLocaleString("en-IN") %>
+            </span>
+          </li>
+        </ul>
+      <% } %>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="chart-card h-100">
+      <h5 class="mb-3">
+        <i class="bi bi-stars me-2 text-warning"></i>Top Expense Categories
+      </h5>
+
+      <% if (topCategories.length === 0) { %>
+        <div class="empty-state py-5">
+          <p class="mb-0">Top categories appear after you record some expenses.</p>
+        </div>
+      <% } else { %>
+        <ul class="insight-list">
+          <% topCategories.forEach(([name, amount]) => { %>
+            <li>
+              <div>
+                <div class="fw-semibold"><%= name %></div>
+                <div class="muted-note">Expense category</div>
+              </div>
+              <div class="metric-value text-danger">&#8377;<%= amount.toLocaleString("en-IN") %></div>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include("partials/monthly-table", { monthly }) %>
+
+<%- include("partials/transaction-modal") %>

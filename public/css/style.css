@@ -1,24 +1,34 @@
-/* ===== Base ===== */
+﻿:root {
+  --bg-soft: #f4f7fb;
+  --card-bg: #ffffff;
+  --text-main: #1d2939;
+  --text-muted: #667085;
+  --border-soft: rgba(15, 23, 42, 0.08);
+  --shadow-soft: 0 10px 28px rgba(15, 23, 42, 0.08);
+  --shadow-hover: 0 18px 40px rgba(15, 23, 42, 0.12);
+}
+
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background-color: #f0f2f5;
-  padding-top: 56px; /* offset for fixed navbar */
+  font-family: "Segoe UI", Arial, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(46, 204, 113, 0.12), transparent 24%),
+    linear-gradient(180deg, #f8fafc 0%, var(--bg-soft) 100%);
+  color: var(--text-main);
+  padding-top: 56px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   margin: 0;
 }
 
-/* ===== Layout ===== */
 #wrapper {
   flex: 1;
   align-items: stretch;
 }
 
-/* ===== Sidebar ===== */
 #sidebar {
   width: 220px;
-  min-height: calc(100vh - 56px - 50px);
+  min-height: calc(100vh - 56px - 58px);
   flex-shrink: 0;
   position: sticky;
   top: 56px;
@@ -27,48 +37,71 @@ body {
 
 #sidebar .nav-link {
   padding: 11px 18px;
-  font-size: 0.93rem;
-  border-radius: 8px;
-  margin: 3px 8px;
-  transition: background 0.2s, color 0.2s;
-  color: rgba(255,255,255,0.75) !important;
+  font-size: 0.94rem;
+  border-radius: 10px;
+  margin: 4px 8px;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  color: rgba(255, 255, 255, 0.78) !important;
 }
 
 #sidebar .nav-link:hover,
 #sidebar .nav-link.active {
-  background-color: rgba(255,255,255,0.12);
+  background-color: rgba(255, 255, 255, 0.12);
   color: #fff !important;
+  transform: translateX(2px);
 }
 
 #sidebar .nav-link i {
   width: 20px;
 }
 
-/* ===== Page Content ===== */
 #page-content-wrapper {
   flex: 1;
   padding: 32px;
   overflow-x: hidden;
 }
 
-/* ===== Stat Cards ===== */
+.page-header {
+  flex-wrap: wrap;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.35rem;
+}
+
+.section-subtitle {
+  color: var(--text-muted);
+  max-width: 680px;
+}
+
 .stat-card {
-  border: none;
-  border-radius: 16px;
+  border: 1px solid transparent;
+  border-radius: 18px;
   padding: 28px 24px;
   color: white;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.16);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
 }
 
-.stat-card.income  { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-.stat-card.expense { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-.stat-card.profit  { background: linear-gradient(135deg, #3498db, #2980b9); }
+.stat-card.income {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.stat-card.expense {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.stat-card.profit {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
 
 .stat-card .stat-label {
   font-size: 0.88rem;
@@ -78,32 +111,184 @@ body {
 }
 
 .stat-card .stat-amount {
-  font-size: 2.1rem;
+  font-size: 2.05rem;
   font-weight: 700;
   margin-top: 6px;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.04em;
 }
 
 .stat-card .stat-icon {
-  font-size: 2.2rem;
+  font-size: 2.3rem;
   opacity: 0.35;
 }
 
-/* ===== Chart Cards ===== */
 .chart-card {
-  background: #fff;
-  border-radius: 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
   padding: 24px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  box-shadow: var(--shadow-soft);
 }
 
 .chart-card h5 {
   font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 18px;
+  color: var(--text-main);
 }
 
-/* ===== Footer ===== */
+.chart-card canvas {
+  max-height: 320px;
+}
+
+.empty-state {
+  display: grid;
+  place-items: center;
+  min-height: 180px;
+  color: var(--text-muted);
+  text-align: center;
+  border: 1px dashed rgba(102, 112, 133, 0.25);
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.8);
+}
+
+.finance-table {
+  margin-bottom: 0;
+}
+
+.finance-table thead th {
+  border: 0;
+  white-space: nowrap;
+}
+
+.finance-table tbody td {
+  vertical-align: middle;
+}
+
+.finance-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 999px;
+  text-transform: capitalize;
+}
+
+.type-pill.income {
+  background: rgba(46, 204, 113, 0.14);
+  color: #1d8f4d;
+}
+
+.type-pill.expense {
+  background: rgba(231, 76, 60, 0.14);
+  color: #c0392b;
+}
+
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.recent-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.recent-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.recent-item:first-child {
+  padding-top: 0;
+}
+
+.metric-list,
+.insight-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.metric-list li,
+.insight-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px solid var(--border-soft);
+}
+
+.metric-label {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.metric-value {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.muted-note {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
 #footer {
   flex-shrink: 0;
+}
+
+@media (max-width: 991.98px) {
+  #wrapper {
+    flex-direction: column;
+  }
+
+  #sidebar {
+    width: 100%;
+    min-height: auto;
+    position: static;
+  }
+
+  #sidebar .nav {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 8px;
+  }
+
+  #sidebar .nav-item {
+    flex: 0 0 auto;
+  }
+
+  #page-content-wrapper {
+    padding: 24px 16px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .page-title {
+    font-size: 1.7rem;
+  }
+
+  .stat-card .stat-amount {
+    font-size: 1.7rem;
+  }
+
+  .chart-card {
+    padding: 18px;
+  }
 }
