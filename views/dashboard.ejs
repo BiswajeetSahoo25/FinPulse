@@ -2,15 +2,64 @@
 <html>
 <head>
   <title>FinPulse Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f6fa;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      width: 200px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .income { border-top: 5px solid green; }
+    .expense { border-top: 5px solid red; }
+    .profit { border-top: 5px solid blue; }
+
+    .amount {
+      font-size: 24px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
+
   <h1>FinPulse Dashboard</h1>
 
-  <h2>Summary</h2>
+  <div class="container">
+    <div class="card income">
+      <h3>Total Income</h3>
+      <div class="amount">₹ <%= summary.totalIncome %></div>
+    </div>
 
-  <p>Total Income: <%= summary.totalIncome %></p>
-  <p>Total Expense: <%= summary.totalExpense %></p>
-  <p>Profit: <%= summary.profit %></p>
+    <div class="card expense">
+      <h3>Total Expense</h3>
+      <div class="amount">₹ <%= summary.totalExpense %></div>
+    </div>
+
+    <div class="card profit">
+      <h3>Profit</h3>
+      <div class="amount">₹ <%= summary.profit %></div>
+    </div>
+  </div>
 
 </body>
 </html>
