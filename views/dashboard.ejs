@@ -1,6 +1,7 @@
 <%
-  const categoryPalette = ["#ef4444", "#f97316", "#f59e0b", "#fb7185", "#dc2626", "#fca5a5"];
-  const expenseBreakdown = Object.entries(analytics.categoryBreakdown).sort((entryA, entryB) => entryB[1] - entryA[1]);
+  const expenseBreakdown = Object.entries(analytics.categoryBreakdown).sort(
+    (entryA, entryB) => entryB[1] - entryA[1]
+  );
   const topExpense = expenseBreakdown[0];
   const latestTransaction = transactions[0];
 %>
@@ -21,7 +22,7 @@
       <strong><%= topExpense ? topExpense[0] : "No expense data yet" %></strong>
     </div>
     <p class="hero-badge-copy">
-      <%= topExpense ? `${formatCurrency(topExpense[1])} spent in your biggest category.` : "Add an expense to unlock category insights." %>
+      <%= topExpense ? `${formatCurrency(topExpense[1])} spent in your biggest category.` : "Add expense entries to surface your top spending category." %>
     </p>
     <% if (latestTransaction) { %>
       <div class="hero-mini-stat">
@@ -60,7 +61,23 @@
   </article>
 </section>
 
-<section id="transactions-section" class="content-grid transactions-grid">
+<section id="analytics-section" class="analytics-single">
+  <article class="panel chart-panel chart-panel-wide">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Monthly movement</p>
+        <h3>Income vs expense</h3>
+      </div>
+      <span class="pill neutral-pill">12 months</span>
+    </div>
+
+    <div class="chart-shell chart-shell-wide">
+      <canvas id="monthlyChart" height="140"></canvas>
+    </div>
+  </article>
+</section>
+
+<section id="transactions-section" class="transactions-stack">
   <article class="panel">
     <div class="section-heading">
       <div>
@@ -134,7 +151,7 @@
     </form>
   </article>
 
-  <article class="panel">
+  <article class="panel transaction-feed-panel">
     <div class="section-heading">
       <div>
         <p class="eyebrow">Recent activity</p>
@@ -185,75 +202,23 @@
   </article>
 </section>
 
-<section id="analytics-section" class="content-grid analytics-grid">
-  <article class="panel chart-panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Monthly movement</p>
-        <h3>Income vs expense</h3>
-      </div>
-      <span class="pill neutral-pill">Bar chart</span>
-    </div>
-
-    <div class="chart-shell">
-      <canvas id="monthlyChart" height="140"></canvas>
-    </div>
-  </article>
-
-  <article class="panel chart-panel">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">Expense split</p>
-        <h3>Category breakdown</h3>
-      </div>
-      <span class="pill neutral-pill">Doughnut</span>
-    </div>
-
-    <div class="chart-shell chart-shell-compact">
-      <canvas id="categoryChart" height="140"></canvas>
-      <div class="chart-empty" id="categoryChartEmpty" hidden>
-        Add an expense transaction to see category distribution.
-      </div>
-    </div>
-
-    <% if (expenseBreakdown.length) { %>
-      <div class="category-list">
-        <% expenseBreakdown.forEach((entry, index) => { %>
-          <div class="category-row">
-            <span class="category-label">
-              <span
-                class="category-dot"
-                style="background-color: <%= categoryPalette[index % categoryPalette.length] %>"
-              ></span>
-              <%= entry[0] %>
-            </span>
-            <strong><%= formatCurrency(entry[1]) %></strong>
-          </div>
-        <% }) %>
-      </div>
-    <% } %>
-  </article>
-</section>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   const monthlyData = <%- JSON.stringify(analytics.monthly) %>;
-  const categoryBreakdown = <%- JSON.stringify(analytics.categoryBreakdown) %>;
-  const categoryPalette = <%- JSON.stringify(categoryPalette) %>;
+  const monthlyKeys = Object.keys(monthlyData);
+  const monthlyLabels = monthlyKeys.map((key) => {
+    const [year, month] = key.split("-");
+    const displayDate = new Date(Number(year), Number(month) - 1, 1);
 
-  const monthlyLabels = Object.keys(monthlyData);
-  const monthlyIncome = monthlyLabels.map((label) => monthlyData[label].income);
-  const monthlyExpense = monthlyLabels.map((label) => monthlyData[label].expense);
-
-  const categoryEntries = Object.entries(categoryBreakdown).sort(
-    (entryA, entryB) => entryB[1] - entryA[1]
-  );
-  const categoryLabels = categoryEntries.map((entry) => entry[0]);
-  const categoryValues = categoryEntries.map((entry) => entry[1]);
+    return displayDate.toLocaleDateString("en-IN", {
+      month: "short",
+      year: "2-digit",
+    });
+  });
+  const monthlyIncome = monthlyKeys.map((key) => monthlyData[key].income);
+  const monthlyExpense = monthlyKeys.map((key) => monthlyData[key].expense);
 
   const monthlyChartContext = document.getElementById("monthlyChart");
-  const categoryChartContext = document.getElementById("categoryChart");
-  const categoryChartEmpty = document.getElementById("categoryChartEmpty");
   const currencyFormatter = new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -270,14 +235,14 @@
           data: monthlyIncome,
           backgroundColor: "#1d7a58",
           borderRadius: 12,
-          maxBarThickness: 34,
+          maxBarThickness: 22,
         },
         {
           label: "Expense",
           data: monthlyExpense,
           backgroundColor: "#ef4444",
           borderRadius: 12,
-          maxBarThickness: 34,
+          maxBarThickness: 22,
         },
       ],
     },
@@ -312,6 +277,8 @@
           },
           ticks: {
             color: "#6b6b73",
+            maxRotation: 0,
+            minRotation: 0,
           },
         },
         y: {
@@ -329,45 +296,4 @@
       },
     },
   });
-
-  if (categoryLabels.length) {
-    categoryChartContext.hidden = false;
-    categoryChartEmpty.hidden = true;
-
-    new Chart(categoryChartContext, {
-      type: "doughnut",
-      data: {
-        labels: categoryLabels,
-        datasets: [
-          {
-            data: categoryValues,
-            backgroundColor: categoryLabels.map((_, index) => categoryPalette[index % categoryPalette.length]),
-            borderColor: "#f7f5ef",
-            borderWidth: 4,
-            hoverOffset: 12,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: "62%",
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            callbacks: {
-              label(context) {
-                return `${context.label}: ${currencyFormatter.format(context.parsed || 0)} in expenses`;
-              },
-            },
-          },
-        },
-      },
-    });
-  } else {
-    categoryChartContext.hidden = true;
-    categoryChartEmpty.hidden = false;
-  }
 </script>

@@ -1,18 +1,10 @@
 :root {
-  --bg: #eeece6;
-  --surface: rgba(255, 255, 255, 0.9);
-  --surface-strong: #ffffff;
-  --surface-muted: #f5f3ee;
-  --line: rgba(24, 24, 27, 0.08);
   --text: #18181b;
   --muted: #6b6b73;
-  --sidebar: #0e1014;
-  --sidebar-soft: #1a1d24;
-  --sidebar-line: rgba(255, 255, 255, 0.08);
   --brand: #1d7a58;
-  --brand-soft: #d7f5e6;
   --income: #22c55e;
   --expense: #ef4444;
+  --line: rgba(24, 24, 27, 0.08);
   --shadow: 0 18px 48px rgba(20, 22, 27, 0.08);
   --radius-xl: 30px;
   --radius-lg: 24px;
@@ -66,28 +58,33 @@ textarea {
 .sidebar {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 28px;
   padding: 30px 22px 24px;
   color: #f7f8fa;
   background:
     radial-gradient(circle at top left, rgba(43, 66, 56, 0.55), transparent 26%),
     linear-gradient(180deg, #0b0d11 0%, #11151c 100%);
-  border-right: 1px solid var(--sidebar-line);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-top,
+.topbar-copy,
+.footer-copy,
+.auth-copy {
+  display: grid;
+  gap: 12px;
 }
 
 .sidebar-top {
-  display: grid;
   gap: 28px;
 }
 
 .brand-block,
-.user-chip,
 .topbar,
 .section-heading,
 .profile-card,
-.footer-links,
-.footer-meta {
+.app-footer {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -137,8 +134,7 @@ textarea {
   gap: 10px;
 }
 
-.nav-link,
-.logout-link {
+.nav-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -176,58 +172,11 @@ textarea {
   color: rgba(13, 17, 23, 0.62);
 }
 
-.sidebar-footer {
-  display: grid;
-  gap: 14px;
-}
-
-.user-chip {
-  padding: 16px;
-  align-items: center;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.user-chip div {
-  display: grid;
-  gap: 4px;
-}
-
-.user-chip strong {
-  color: #f7f8fa;
-}
-
-.user-chip span {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.58);
-}
-
-.avatar-sm,
-.avatar-lg {
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.avatar-sm {
-  width: 48px;
-  height: 48px;
-}
-
 .avatar-lg {
   width: 56px;
   height: 56px;
-}
-
-.logout-link {
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.8);
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-.logout-link:hover {
-  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .main-shell {
@@ -248,12 +197,9 @@ textarea {
   backdrop-filter: blur(12px);
 }
 
-.topbar-copy {
-  display: grid;
-  gap: 8px;
-}
-
-.topbar .eyebrow {
+.topbar .eyebrow,
+.section-heading .eyebrow,
+.auth-copy .eyebrow {
   color: var(--brand);
 }
 
@@ -277,7 +223,11 @@ textarea {
   box-shadow: inset 0 0 0 1px rgba(24, 24, 27, 0.06);
 }
 
-.page-shell {
+.page-shell,
+.analytics-single,
+.transactions-stack,
+.transaction-form,
+.auth-form {
   display: grid;
   gap: 24px;
 }
@@ -313,8 +263,10 @@ textarea {
   margin: 10px 0 12px;
 }
 
-.hero-text {
-  max-width: 720px;
+.hero-text,
+.footer-note,
+.auth-copy p:last-child,
+.auth-switch {
   color: var(--muted);
   line-height: 1.8;
 }
@@ -329,12 +281,13 @@ textarea {
   background: linear-gradient(180deg, #13171e 0%, #1f2630 100%);
 }
 
-.hero-badge span {
-  color: rgba(255, 255, 255, 0.6);
+.hero-badge span,
+.hero-mini-stat small {
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .hero-badge-copy {
-  color: rgba(255, 255, 255, 0.76);
+  color: rgba(255, 255, 255, 0.78);
   line-height: 1.7;
 }
 
@@ -344,10 +297,6 @@ textarea {
   padding: 14px 16px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.08);
-}
-
-.hero-mini-stat small {
-  color: rgba(255, 255, 255, 0.62);
 }
 
 .summary-grid {
@@ -388,20 +337,6 @@ textarea {
   background: linear-gradient(180deg, rgba(238, 249, 243, 0.96), #ffffff);
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: 1.05fr 0.95fr;
-  gap: 24px;
-}
-
-.transactions-grid {
-  align-items: start;
-}
-
-.analytics-grid {
-  align-items: start;
-}
-
 .panel {
   padding: 24px;
   border-radius: var(--radius-xl);
@@ -412,6 +347,11 @@ textarea {
   align-content: start;
 }
 
+.chart-shell {
+  position: relative;
+  min-height: 360px;
+}
+
 .section-heading {
   justify-content: space-between;
   margin-bottom: 22px;
@@ -420,34 +360,6 @@ textarea {
 .section-heading h3 {
   margin-top: 6px;
   font-size: 1.75rem;
-}
-
-.section-heading .eyebrow {
-  color: var(--brand);
-}
-
-.chart-shell {
-  position: relative;
-  min-height: 320px;
-}
-
-.chart-shell-compact {
-  min-height: 280px;
-}
-
-.chart-empty {
-  display: grid;
-  place-items: center;
-  min-height: 260px;
-  padding: 18px;
-  text-align: center;
-  color: var(--muted);
-  border-radius: 22px;
-  background: rgba(245, 243, 238, 0.82);
-}
-
-.chart-empty[hidden] {
-  display: none;
 }
 
 .pill {
@@ -465,19 +377,8 @@ textarea {
   background: #eceae3;
 }
 
-.income-pill {
-  color: #166534;
-  background: #dcfce7;
-}
-
-.expense-pill {
-  color: #b91c1c;
-  background: #fee2e2;
-}
-
-.transaction-form {
-  display: grid;
-  gap: 16px;
+.transaction-feed-panel {
+  width: 100%;
 }
 
 .field-grid {
@@ -533,36 +434,6 @@ textarea:focus {
   overflow-x: auto;
 }
 
-.category-list {
-  display: grid;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-.category-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: rgba(245, 243, 238, 0.88);
-}
-
-.category-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-}
-
-.category-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
 .transaction-table {
   width: 100%;
   border-collapse: collapse;
@@ -581,6 +452,16 @@ textarea:focus {
   font-size: 0.83rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.income-pill {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.expense-pill {
+  color: #b91c1c;
+  background: #fee2e2;
 }
 
 .amount-positive {
@@ -622,10 +503,8 @@ textarea:focus {
 }
 
 .app-footer {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  width: 100%;
   padding: 24px 26px;
   border-radius: var(--radius-xl);
   color: #f8fafc;
@@ -633,7 +512,6 @@ textarea:focus {
 }
 
 .footer-copy {
-  display: grid;
   gap: 8px;
 }
 
@@ -645,28 +523,29 @@ textarea:focus {
   font-size: 1.65rem;
 }
 
-.footer-note {
-  color: rgba(255, 255, 255, 0.68);
-  line-height: 1.7;
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  flex-shrink: 0;
+  color: #f8fafc;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease;
 }
 
-.footer-links,
-.footer-meta {
-  flex-wrap: wrap;
-  justify-content: flex-end;
+.github-link:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-2px);
 }
 
-.footer-links a,
-.footer-meta span {
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.78);
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.footer-links a:hover {
-  background: rgba(255, 255, 255, 0.12);
+.github-link svg {
+  width: 28px;
+  height: 28px;
 }
 
 .auth-screen {
@@ -687,28 +566,8 @@ textarea:focus {
   background: rgba(255, 255, 255, 0.92);
 }
 
-.auth-copy {
-  display: grid;
-  gap: 8px;
-}
-
 .auth-card h1 {
   font-size: clamp(2rem, 4vw, 2.8rem);
-}
-
-.auth-copy .eyebrow {
-  color: var(--brand);
-}
-
-.auth-copy p:last-child,
-.auth-switch {
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-.auth-form {
-  display: grid;
-  gap: 16px;
 }
 
 .auth-switch a {
@@ -718,7 +577,7 @@ textarea:focus {
 
 canvas {
   width: 100% !important;
-  height: 320px !important;
+  height: 360px !important;
 }
 
 @media (max-width: 1160px) {
@@ -727,7 +586,6 @@ canvas {
   }
 
   .sidebar {
-    gap: 20px;
     border-right: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
@@ -741,20 +599,13 @@ canvas {
   .topbar,
   .hero-panel,
   .app-footer {
-    grid-template-columns: 1fr;
     flex-direction: column;
     align-items: flex-start;
   }
 
   .summary-grid,
-  .content-grid,
   .field-grid {
     grid-template-columns: 1fr;
-  }
-
-  .footer-links,
-  .footer-meta {
-    justify-content: flex-start;
   }
 }
 
@@ -769,10 +620,15 @@ canvas {
 
   .hero-panel {
     padding: 24px;
+    grid-template-columns: 1fr;
   }
 
   .profile-card {
     width: 64px;
     height: 64px;
+  }
+
+  canvas {
+    height: 300px !important;
   }
 }

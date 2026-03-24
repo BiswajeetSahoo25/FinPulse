@@ -9,6 +9,22 @@ function getMonthKey(dateValue) {
   return `${date.getFullYear()}-${month}`;
 }
 
+function getLastTwelveMonthKeys(referenceDate = new Date()) {
+  const monthKeys = [];
+
+  for (let offset = 11; offset >= 0; offset -= 1) {
+    const date = new Date(
+      referenceDate.getFullYear(),
+      referenceDate.getMonth() - offset,
+      1
+    );
+
+    monthKeys.push(getMonthKey(date));
+  }
+
+  return monthKeys;
+}
+
 function calculateSummary(transactions = []) {
   const totals = transactions.reduce(
     (summary, transaction) => {
@@ -36,45 +52,41 @@ function calculateSummary(transactions = []) {
 }
 
 function calculateAnalytics(transactions = []) {
-  const monthly = {};
+  const monthly = getLastTwelveMonthKeys().reduce((result, monthKey) => {
+    result[monthKey] = {
+      income: 0,
+      expense: 0,
+    };
+
+    return result;
+  }, {});
   const categoryBreakdown = {};
 
   transactions.forEach((transaction) => {
     const monthKey = getMonthKey(transaction.date);
 
-    if (!monthly[monthKey]) {
-      monthly[monthKey] = {
-        income: 0,
-        expense: 0,
-      };
-    }
-
-    if (transaction.type === "income") {
+    if (transaction.type === "income" && monthly[monthKey]) {
       monthly[monthKey].income += transaction.amount;
     }
 
     if (transaction.type === "expense") {
-      monthly[monthKey].expense += transaction.amount;
+      if (monthly[monthKey]) {
+        monthly[monthKey].expense += transaction.amount;
+      }
+
       categoryBreakdown[transaction.category] =
         (categoryBreakdown[transaction.category] || 0) + transaction.amount;
     }
   });
 
-  if (Object.keys(monthly).length === 0) {
-    const currentMonth = getMonthKey(new Date());
-    monthly[currentMonth] = { income: 0, expense: 0 };
-  }
+  const sortedMonthly = Object.keys(monthly).reduce((result, monthKey) => {
+    result[monthKey] = {
+      income: roundCurrency(monthly[monthKey].income),
+      expense: roundCurrency(monthly[monthKey].expense),
+    };
 
-  const sortedMonthly = Object.keys(monthly)
-    .sort()
-    .reduce((result, monthKey) => {
-      result[monthKey] = {
-        income: roundCurrency(monthly[monthKey].income),
-        expense: roundCurrency(monthly[monthKey].expense),
-      };
-
-      return result;
-    }, {});
+    return result;
+  }, {});
 
   const sortedCategoryBreakdown = Object.keys(categoryBreakdown)
     .sort()
