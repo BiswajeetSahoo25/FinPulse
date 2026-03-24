@@ -7,13 +7,13 @@ require("dotenv").config();
 
 const app = express();
 
-
 // Middleware
 // app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(expressLayouts);
+app.set("layout", "layouts/boilerplate");
 
 // DB connection
 mongoose
@@ -23,7 +23,7 @@ mongoose
 
 // Routes
 app.get("/", (req, res) => {
-  res.send("FinPulse is running ");
+  res.send("FinPulse is running");
 });
 
 // TRANSACTION
@@ -167,7 +167,6 @@ app.get("/dashboard", async (req, res) => {
     };
 
     res.render("dashboard", { summary });
-
   } catch (err) {
     res.send(err.message);
   }
