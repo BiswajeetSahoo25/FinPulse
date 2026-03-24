@@ -1,0 +1,36 @@
+<aside class="sidebar">
+  <div class="brand-block">
+    <div class="brand-mark">FP</div>
+    <div>
+      <p class="eyebrow">Fintech MVP</p>
+      <h2>FinPulse</h2>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a
+      class="nav-link <%= currentPath === '/dashboard' ? 'active' : '' %>"
+      href="/dashboard#dashboard-overview"
+    >
+      Dashboard
+    </a>
+    <a class="nav-link" href="/dashboard#transactions-section">Transactions</a>
+    <a class="nav-link" href="/dashboard#analytics-section">Analytics</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-chip">
+      <img
+        src="<%= currentUser.avatar %>"
+        alt="<%= currentUser.name %>"
+        class="avatar-sm"
+      />
+      <div>
+        <strong><%= currentUser.name %></strong>
+        <span><%= currentUser.businessName %></span>
+      </div>
+    </div>
+
+    <a class="logout-link" href="/logout">Logout</a>
+  </div>
+</aside>

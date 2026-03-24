@@ -1,0 +1,18 @@
+<header class="topbar">
+  <div>
+    <p class="eyebrow">Business pulse</p>
+    <h1><%= pageTitle || "Dashboard" %></h1>
+  </div>
+
+  <div class="profile-card">
+    <div class="profile-copy">
+      <strong><%= currentUser.name %></strong>
+      <span><%= currentUser.businessName %></span>
+    </div>
+    <img
+      src="<%= currentUser.avatar %>"
+      alt="<%= currentUser.name %>"
+      class="avatar-lg"
+    />
+  </div>
+</header>
