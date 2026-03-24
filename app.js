@@ -62,8 +62,44 @@ app.post("/transactions", async (req, res) => {
 });
 
 //Get
-app.get("/transactions", (req, res) => {
-  res.send("hello");
+app.get("/transactions", async (req, res) => {
+  try {
+    const transactions = await Transaction.find();
+
+    res.json({
+      count: transactions.length,
+      data: transactions,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get("/summary", async (req, res) => {
+  try {
+    const transactions = await Transaction.find();
+
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    transactions.forEach((t) => {
+      if (t.type === "income") {
+        totalIncome += t.amount;
+      } else if (t.type === "expense") {
+        totalExpense += t.amount;
+      }
+    });
+
+    const profit = totalIncome - totalExpense;
+
+    res.json({
+      totalIncome,
+      totalExpense,
+      profit,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // const transactionRoutes = require("./routes/transactionRoutes");
