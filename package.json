@@ -1,0 +1,32 @@
+{
+  "name": "nebulon-project-1",
+  "version": "1.0.0",
+  "description": "\"# FinPulse\"",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BiswajeetSahoo25/FinPulse.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BiswajeetSahoo25/FinPulse/issues"
+  },
+  "homepage": "https://github.com/BiswajeetSahoo25/FinPulse#readme",
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "dotenv": "^17.3.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "mongoose": "^9.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
