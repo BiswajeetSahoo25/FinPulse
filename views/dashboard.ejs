@@ -97,34 +97,3 @@
     }
   });
 </script>
-
-<h2 style="text-align:center; margin-top:50px;">Monthly Overview</h2>
-
-<canvas id="monthlyChart" width="600" height="300"></canvas>
-
-<script>
-  const monthlyData = <%- JSON.stringify(monthly) %>;
-
-  const labels = Object.keys(monthlyData);
-  const incomeData = labels.map(m => monthlyData[m].income);
-  const expenseData = labels.map(m => monthlyData[m].expense);
-
-  const ctx = document.getElementById('monthlyChart').getContext('2d');
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [
-        {
-          label: 'Income',
-          data: incomeData
-        },
-        {
-          label: 'Expense',
-          data: expenseData
-        }
-      ]
-    }
-  });
-</script>
