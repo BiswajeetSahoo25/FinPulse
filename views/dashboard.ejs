@@ -226,7 +226,7 @@
           <div class="assistant-actions">
             <span class="assistant-status <%= aiEnabled ? "online" : "offline" %>">
               <i class="bi <%= aiEnabled ? "bi-wifi" : "bi-wifi-off" %>"></i>
-              <%= aiEnabled ? `Connected to ${aiModel}` : "Setup required" %>
+              <%= aiEnabled ? "Connected" : "Setup required" %>
             </span>
             <button class="btn btn-outline-secondary btn-sm" id="assistantClear" type="button">
               <i class="bi bi-arrow-clockwise me-1"></i>Clear chat

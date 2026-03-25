@@ -443,7 +443,7 @@ app.post("/auth/login", async (req, res, next) => {
       res,
       redirectTo,
       "success",
-      `Welcome back, ${user.name}.`,
+      isAiConfigured() ? "Connected" : `Welcome back, ${user.name}.`,
     );
   } catch (error) {
     return next(error);

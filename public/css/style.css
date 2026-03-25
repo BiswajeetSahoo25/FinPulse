@@ -125,6 +125,12 @@ body {
 
 .shell-alert {
   margin-bottom: 1rem;
+  transition: opacity 0.26s ease, transform 0.26s ease;
+}
+
+.shell-alert.is-hiding {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 .page-header {

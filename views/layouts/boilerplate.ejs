@@ -10,6 +10,7 @@
 </head>
 <body>
   <% const isActive = (path) => currentPath === path ? "active" : ""; %>
+  <% const shouldAutoDismissFlash = flash && flash.message === "Connected"; %>
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top px-4">
     <a class="navbar-brand fw-bold fs-4" href="/dashboard">
@@ -82,7 +83,11 @@
 
     <div id="page-content-wrapper">
       <% if (flash) { %>
-        <div class="alert alert-<%= flash.type %> shell-alert" role="alert"><%= flash.message %></div>
+        <div
+          class="alert alert-<%= flash.type %> shell-alert"
+          role="<%= shouldAutoDismissFlash ? "status" : "alert" %>"
+          data-auto-dismiss="<%= shouldAutoDismissFlash ? "true" : "false" %>"
+        ><%= flash.message %></div>
       <% } %>
       <%- body %>
     </div>
@@ -126,5 +131,28 @@
   <script src="/js/dashboard.js"></script>
   <script src="/js/transactions-page.js"></script>
   <script src="/js/user-management.js"></script>
+  <script>
+    (function initShellAlert() {
+      const alertNode = document.querySelector(".shell-alert");
+
+      if (!alertNode) {
+        return;
+      }
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete("flashType");
+      url.searchParams.delete("flashMessage");
+      window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
+
+      if (alertNode.dataset.autoDismiss !== "true") {
+        return;
+      }
+
+      window.setTimeout(() => {
+        alertNode.classList.add("is-hiding");
+        window.setTimeout(() => alertNode.remove(), 260);
+      }, 2400);
+    })();
+  </script>
 </body>
 </html>
